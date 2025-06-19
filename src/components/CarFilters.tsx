@@ -140,54 +140,46 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
     applyFilters();
   }, [searchQuery, selectedMake, selectedYear, selectedFuelType, selectedBodyType, selectedLocation, selectedPriceRange, cars]);
 
-  const FilterSection = ({ title, options, selected, onSelect }: {
+  const SelectFilter = ({ title, value, onChange, options }: {
     title: string;
+    value: string;
+    onChange: (value: string) => void;
     options: string[];
-    selected: string;
-    onSelect: (value: string) => void;
   }) => (
-    <div className="mb-6">
-      <h3 className="text-sm font-semibold text-white mb-3 uppercase tracking-wider">
+    <div className="mb-4">
+      <label className="block text-sm font-semibold text-white mb-2 uppercase tracking-wider">
         {title}
-      </h3>
-      <div className="space-y-2">
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white text-sm focus:border-orange-500 focus:outline-none"
+      >
         {options.map((option) => (
-          <button
-            key={option}
-            onClick={() => onSelect(option)}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-              selected === option
-                ? 'bg-orange-500 text-white'
-                : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50'
-            }`}
-          >
+          <option key={option} value={option} className="bg-gray-800">
             {option}
-          </button>
+          </option>
         ))}
-      </div>
+      </select>
     </div>
   );
 
   const PriceRangeSection = () => (
-    <div className="mb-6">
-      <h3 className="text-sm font-semibold text-white mb-3 uppercase tracking-wider">
+    <div className="mb-4">
+      <label className="block text-sm font-semibold text-white mb-2 uppercase tracking-wider">
         Preț
-      </h3>
-      <div className="space-y-2">
+      </label>
+      <select
+        value={selectedPriceRange}
+        onChange={(e) => setSelectedPriceRange(e.target.value)}
+        className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white text-sm focus:border-orange-500 focus:outline-none"
+      >
         {filterOptions.priceRanges.map((range) => (
-          <button
-            key={range.label}
-            onClick={() => setSelectedPriceRange(range.label)}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-              selectedPriceRange === range.label
-                ? 'bg-orange-500 text-white'
-                : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50'
-            }`}
-          >
+          <option key={range.label} value={range.label} className="bg-gray-800">
             {range.label}
-          </button>
+          </option>
         ))}
-      </div>
+      </select>
     </div>
   );
 
@@ -230,43 +222,43 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
         </div>
       </div>
 
-      {/* Filters - Always visible */}
-      <div className="space-y-4">
-        <FilterSection
+      {/* Filters - Using selects for better space efficiency */}
+      <div className="space-y-2">
+        <SelectFilter
           title="Marcă"
+          value={selectedMake}
+          onChange={setSelectedMake}
           options={filterOptions.makes}
-          selected={selectedMake}
-          onSelect={setSelectedMake}
         />
 
-        <FilterSection
+        <SelectFilter
           title="An"
+          value={selectedYear}
+          onChange={setSelectedYear}
           options={filterOptions.years}
-          selected={selectedYear}
-          onSelect={setSelectedYear}
         />
 
         <PriceRangeSection />
 
-        <FilterSection
+        <SelectFilter
           title="Combustibil"
+          value={selectedFuelType}
+          onChange={setSelectedFuelType}
           options={filterOptions.fuelTypes}
-          selected={selectedFuelType}
-          onSelect={setSelectedFuelType}
         />
 
-        <FilterSection
+        <SelectFilter
           title="Tip Caroserie"
+          value={selectedBodyType}
+          onChange={setSelectedBodyType}
           options={filterOptions.bodyTypes}
-          selected={selectedBodyType}
-          onSelect={setSelectedBodyType}
         />
 
-        <FilterSection
+        <SelectFilter
           title="Locație"
+          value={selectedLocation}
+          onChange={setSelectedLocation}
           options={filterOptions.locations}
-          selected={selectedLocation}
-          onSelect={setSelectedLocation}
         />
 
         {/* Clear Filters */}
@@ -274,7 +266,7 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
           <Button
             onClick={clearFilters}
             variant="outline"
-            className="w-full border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+            className="w-full border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white mt-4"
           >
             <X className="w-4 h-4 mr-2" />
             Șterge Filtrele
