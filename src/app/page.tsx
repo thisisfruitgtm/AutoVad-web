@@ -280,7 +280,7 @@ export default function Home() {
       <footer className="py-8 px-4 border-t border-white/10">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex justify-center items-center gap-8 mb-4">
-            <span className="text-gray-400 text-sm">© 2024 AutoVad</span>
+            <span className="text-gray-400 text-sm">© 2025 AutoVad</span>
             <span className="text-gray-400 text-sm">•</span>
             <span className="text-gray-400 text-sm">Termeni și condiții</span>
             <span className="text-gray-400 text-sm">•</span>

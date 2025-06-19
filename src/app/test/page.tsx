@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, RefreshCw, Filter, User, LogIn, Star, Shield, Zap, Home as HomeIcon, Heart, Settings, Gauge, Fuel, MapPin, Share, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function TestPage() {
   const [cars, setCars] = useState<Car[]>([]);
@@ -412,10 +413,12 @@ export default function TestPage() {
                                 key={index}
                                 className="relative group aspect-video bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-orange-500 transition-all"
                               >
-                                <img 
+                                <Image 
                                   src={image} 
                                   alt={`${car.make} ${car.model} - Poza ${index + 1}`}
                                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                  width={400}
+                                  height={225}
                                 />
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity" />
                               </button>

@@ -2,6 +2,7 @@ import { Car } from '@/types/car';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, Eye, MapPin } from 'lucide-react';
+import Image from 'next/image';
 
 interface CarCardProps {
   car: Car;
@@ -24,10 +25,12 @@ export function CarCard({ car }: CarCardProps) {
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <CardHeader className="p-0">
         <div className="relative">
-          <img
+          <Image
             src={car.images[0] || '/placeholder-car.jpg'}
             alt={`${car.make} ${car.model}`}
             className="w-full h-48 object-cover"
+            width={400}
+            height={192}
           />
           <div className="absolute top-2 right-2">
             <Badge variant="secondary" className="bg-black/70 text-white">
