@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Search, RefreshCw, Filter, User, LogIn, Star, Shield, Zap, Home as HomeIcon, Heart, Settings, Gauge, Fuel, MapPin, Share, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { CarFilters } from '@/components/CarFilters';
 
 export default function TestPage() {
   const [cars, setCars] = useState<Car[]>([]);
+  const [filteredCars, setFilteredCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -38,6 +40,7 @@ export default function TestPage() {
       setLoading(true);
       const data = await carService.getCars();
       setCars(data);
+      setFilteredCars(data);
     } catch (error) {
       console.error('Error loading cars:', error);
     } finally {
@@ -61,6 +64,7 @@ export default function TestPage() {
         setLoading(true);
         const data = await carService.searchCars(query);
         setCars(data);
+        setFilteredCars(data);
       } catch (error) {
         console.error('Error searching cars:', error);
       } finally {
@@ -81,6 +85,10 @@ export default function TestPage() {
 
   const handleShare = (carId: string) => {
     console.log('Share car:', carId);
+  };
+
+  const handleFiltersChange = (filtered: Car[]) => {
+    setFilteredCars(filtered);
   };
 
   if (loading) {
@@ -135,26 +143,13 @@ export default function TestPage() {
         {/* Main Content - Fixed Layout */}
         <div className="max-w-[1640px] flex h-[calc(100vh-76px)] mx-auto">
           
-          {/* Left Sidebar - Fixed */}
-          <div className="w-72 bg-black/50 border-r border-gray-800 p-6 flex-shrink-0">
-            <nav className="space-y-2">
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-800/50 font-medium">
-                <HomeIcon className="w-4 h-4 mr-3" />
-                Feed
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-                <Heart className="w-4 h-4 mr-3" />
-                Favorite
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-                <User className="w-4 h-4 mr-3" />
-                Profilul meu
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-                <Settings className="w-4 h-4 mr-3" />
-                Setări
-              </Button>
-            </nav>
+          {/* Left Sidebar - Filters */}
+          <div className="w-80 bg-black/50 border-r border-gray-800 p-6 flex-shrink-0">
+            <CarFilters 
+              cars={cars} 
+              onFiltersChange={handleFiltersChange}
+              className="sticky top-6"
+            />
           </div>
 
           {/* Center Feed - Loading State */}
@@ -290,32 +285,19 @@ export default function TestPage() {
       {/* Main Content - Fixed Layout */}
       <div className="max-w-[1640px] flex h-[calc(100vh-76px)] mx-auto">
         
-        {/* Left Sidebar - Fixed */}
-        <div className="w-72 bg-black/50 border-r border-gray-800 p-6 flex-shrink-0">
-          <nav className="space-y-2">
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-800/50 font-medium">
-              <HomeIcon className="w-4 h-4 mr-3" />
-              Feed
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-              <Heart className="w-4 h-4 mr-3" />
-              Favorite
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-              <User className="w-4 h-4 mr-3" />
-              Profilul meu
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-              <Settings className="w-4 h-4 mr-3" />
-              Setări
-            </Button>
-          </nav>
+        {/* Left Sidebar - Filters */}
+        <div className="w-80 bg-black/50 border-r border-gray-800 p-6 flex-shrink-0">
+          <CarFilters 
+            cars={cars} 
+            onFiltersChange={handleFiltersChange}
+            className="sticky top-6"
+          />
         </div>
 
         {/* Center Feed - Scrollable 9:16 */}
         <div className="flex-1 flex justify-center overflow-y-auto bg-black/30 px-4">
           <div className="w-full max-w-[1200px] py-6">
-            {cars.length === 0 ? (
+            {filteredCars.length === 0 ? (
               <div className="text-center py-8 px-4 bg-gray-900/50 rounded-lg border border-gray-800">
                 <p className="text-gray-400">
                   {searchQuery ? 'Nu s-au găsit mașini pentru căutarea ta.' : 'Nu există mașini disponibile momentan.'}
@@ -323,7 +305,7 @@ export default function TestPage() {
               </div>
             ) : (
               <div className="space-y-6">
-                {cars.map((car) => (
+                {filteredCars.map((car) => (
                   <div key={car.id} className="flex gap-6">
                     <div className="w-[360px] flex-shrink-0">
                       <div className="aspect-[9/16] bg-gray-900/80 rounded-xl overflow-hidden border border-gray-800 shadow-lg">
