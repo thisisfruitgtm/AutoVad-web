@@ -143,12 +143,34 @@ export default function TestPage() {
         {/* Main Content - Fixed Layout */}
         <div className="max-w-[1640px] flex h-[calc(100vh-76px)] mx-auto">
           
-          {/* Left Sidebar - Filters */}
+          {/* Left Sidebar - Navigation + Filters */}
           <div className="w-80 bg-black/50 border-r border-gray-800 p-6 flex-shrink-0">
+            {/* Navigation Menu */}
+            <div className="mb-8">
+              <nav className="space-y-2">
+                <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-800/50 font-medium">
+                  <HomeIcon className="w-4 h-4 mr-3" />
+                  Feed
+                </Button>
+                <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                  <Heart className="w-4 h-4 mr-3" />
+                  Favorite
+                </Button>
+                <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                  <User className="w-4 h-4 mr-3" />
+                  Profilul meu
+                </Button>
+                <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                  <Settings className="w-4 h-4 mr-3" />
+                  Setări
+                </Button>
+              </nav>
+            </div>
+
+            {/* Filters */}
             <CarFilters 
               cars={cars} 
               onFiltersChange={handleFiltersChange}
-              className="sticky top-6"
             />
           </div>
 
@@ -285,12 +307,34 @@ export default function TestPage() {
       {/* Main Content - Fixed Layout */}
       <div className="max-w-[1640px] flex h-[calc(100vh-76px)] mx-auto">
         
-        {/* Left Sidebar - Filters */}
+        {/* Left Sidebar - Navigation + Filters */}
         <div className="w-80 bg-black/50 border-r border-gray-800 p-6 flex-shrink-0">
+          {/* Navigation Menu */}
+          <div className="mb-8">
+            <nav className="space-y-2">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-800/50 font-medium">
+                <HomeIcon className="w-4 h-4 mr-3" />
+                Feed
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                <Heart className="w-4 h-4 mr-3" />
+                Favorite
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                <User className="w-4 h-4 mr-3" />
+                Profilul meu
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                <Settings className="w-4 h-4 mr-3" />
+                Setări
+              </Button>
+            </nav>
+          </div>
+
+          {/* Filters */}
           <CarFilters 
             cars={cars} 
             onFiltersChange={handleFiltersChange}
-            className="sticky top-6"
           />
         </div>
 

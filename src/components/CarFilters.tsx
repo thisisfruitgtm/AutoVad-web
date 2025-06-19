@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Filter, X } from 'lucide-react';
 import { Car } from '@/types/car';
 
 interface FilterOptions {
@@ -24,7 +24,6 @@ interface CarFiltersProps {
 
 export function CarFilters({ cars, onFiltersChange, className = '' }: CarFiltersProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
   
   // Filter states
   const [selectedMake, setSelectedMake] = useState<string>('All');
@@ -215,14 +214,6 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
             </Badge>
           )}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowFilters(!showFilters)}
-          className="text-gray-400 hover:text-white"
-        >
-          {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </Button>
       </div>
 
       {/* Search */}
@@ -239,59 +230,57 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
         </div>
       </div>
 
-      {/* Filters */}
-      {showFilters && (
-        <div className="space-y-4">
-          <FilterSection
-            title="Marcă"
-            options={filterOptions.makes}
-            selected={selectedMake}
-            onSelect={setSelectedMake}
-          />
+      {/* Filters - Always visible */}
+      <div className="space-y-4">
+        <FilterSection
+          title="Marcă"
+          options={filterOptions.makes}
+          selected={selectedMake}
+          onSelect={setSelectedMake}
+        />
 
-          <FilterSection
-            title="An"
-            options={filterOptions.years}
-            selected={selectedYear}
-            onSelect={setSelectedYear}
-          />
+        <FilterSection
+          title="An"
+          options={filterOptions.years}
+          selected={selectedYear}
+          onSelect={setSelectedYear}
+        />
 
-          <PriceRangeSection />
+        <PriceRangeSection />
 
-          <FilterSection
-            title="Combustibil"
-            options={filterOptions.fuelTypes}
-            selected={selectedFuelType}
-            onSelect={setSelectedFuelType}
-          />
+        <FilterSection
+          title="Combustibil"
+          options={filterOptions.fuelTypes}
+          selected={selectedFuelType}
+          onSelect={setSelectedFuelType}
+        />
 
-          <FilterSection
-            title="Tip Caroserie"
-            options={filterOptions.bodyTypes}
-            selected={selectedBodyType}
-            onSelect={setSelectedBodyType}
-          />
+        <FilterSection
+          title="Tip Caroserie"
+          options={filterOptions.bodyTypes}
+          selected={selectedBodyType}
+          onSelect={setSelectedBodyType}
+        />
 
-          <FilterSection
-            title="Locație"
-            options={filterOptions.locations}
-            selected={selectedLocation}
-            onSelect={setSelectedLocation}
-          />
+        <FilterSection
+          title="Locație"
+          options={filterOptions.locations}
+          selected={selectedLocation}
+          onSelect={setSelectedLocation}
+        />
 
-          {/* Clear Filters */}
-          {activeFiltersCount > 0 && (
-            <Button
-              onClick={clearFilters}
-              variant="outline"
-              className="w-full border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Șterge Filtrele
-            </Button>
-          )}
-        </div>
-      )}
+        {/* Clear Filters */}
+        {activeFiltersCount > 0 && (
+          <Button
+            onClick={clearFilters}
+            variant="outline"
+            className="w-full border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+          >
+            <X className="w-4 h-4 mr-2" />
+            Șterge Filtrele
+          </Button>
+        )}
+      </div>
     </div>
   );
 } 
