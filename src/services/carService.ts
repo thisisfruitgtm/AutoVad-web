@@ -21,8 +21,8 @@ interface RawCarData {
   created_at: string;
   likes_count: number;
   comments_count: number;
-  images: string[];
-  videos: string[];
+  images?: string[];
+  videos?: string[];
 }
 
 export const carService = {
@@ -34,7 +34,7 @@ export const carService = {
       }
       const result = await response.json();
       
-      // Transform data to include default images since we're not fetching images array
+      // Transform data - images and videos will be loaded separately
       const transformedCars: Car[] = (result.data || []).map((car: RawCarData) => ({
         ...car,
         images: car.images || [],
@@ -57,6 +57,23 @@ export const carService = {
     } catch (error) {
       console.error('Error fetching cars:', error);
       return { data: [], hasMore: false, totalCount: 0 };
+    }
+  },
+
+  async getCarMedia(carId: string): Promise<{ images: string[], videos: string[] }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/cars/${carId}?images=true`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch car media');
+      }
+      const result = await response.json();
+      return {
+        images: result.data?.images || [],
+        videos: result.data?.videos || []
+      };
+    } catch (error) {
+      console.error('Error fetching car media:', error);
+      return { images: [], videos: [] };
     }
   },
 

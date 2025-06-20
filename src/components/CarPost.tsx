@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ImageViewer } from './ImageViewer';
 import Image from 'next/image';
 import { trackCarView, trackLike, trackComment, trackShare } from '@/lib/analytics';
+import { useCarMedia } from '@/hooks/useCarMedia';
 
 interface CarPostProps {
   car: Car;
@@ -25,6 +26,9 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
   const [hasTrackedView, setHasTrackedView] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Lazy load media when in view
+  const { images, videos, loading: mediaLoading } = useCarMedia(car.id, isInView);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -161,7 +165,15 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
         <CardContent className="p-0">
           {/* Video/Image Section */}
           <div ref={containerRef} className="relative aspect-[9/16] bg-gray-900">
-            {car.videos?.length > 0 ? (
+            {mediaLoading ? (
+              // Loading state
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
+                  <p className="text-gray-400 text-xs">Se încarcă...</p>
+                </div>
+              </div>
+            ) : videos?.length > 0 ? (
               <div 
                 className="relative w-full h-full group"
                 onMouseEnter={handleVideoMouseEnter}
@@ -169,13 +181,13 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
               >
                 <video
                   ref={videoRef}
-                  src={car.videos[0]}
+                  src={videos[0]}
                   className="w-full h-full object-cover"
                   loop
                   muted
                   playsInline
                   controls
-                  poster={car.images[0]}
+                  poster={images[0]}
                   preload="none"
                 />
                 {/* Overlay pentru hover */}
@@ -187,7 +199,7 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
                 className="w-full h-full"
               >
                 <Image
-                  src={car.images[0] || 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800'}
+                  src={images[0] || 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800'}
                   alt={`${car.make} ${car.model}`}
                   className="w-full h-full object-cover"
                   fill
@@ -307,9 +319,9 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
           </div>
 
           {/* Galerie Foto */}
-          {displayMode === 'full' && car.images.length > 1 && (
+          {displayMode === 'full' && images.length > 1 && (
             <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-              {car.images.map((image, idx) => (
+              {images.map((image, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleImageClick(idx)}
@@ -330,7 +342,7 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
       </Card>
 
       <ImageViewer
-        images={car.images}
+        images={images}
         initialIndex={selectedImageIndex}
         isOpen={showImageViewer}
         onClose={() => setShowImageViewer(false)}
