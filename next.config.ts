@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    domains: ['images.unsplash.com', 'images.pexels.com'],
   },
   async rewrites() {
     return [
