@@ -5,6 +5,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { trackAuth } from '@/lib/analytics';
+import posthog from 'posthog-js';
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -17,6 +18,11 @@ export function useAuth() {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        posthog.identify(session.user.id, {
+          email: session.user.email,
+        });
+      }
       setLoading(false);
     }
 
@@ -25,6 +31,13 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        posthog.identify(session.user.id, {
+          email: session.user.email,
+        });
+      } else {
+        posthog.reset();
+      }
       setLoading(false);
     });
 
@@ -80,6 +93,8 @@ export function useAuth() {
         action: 'logout',
         success: true,
       });
+      
+      posthog.reset();
       
       router.refresh();
     } catch (error) {

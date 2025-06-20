@@ -7,6 +7,7 @@ import { ImageViewer } from './ImageViewer';
 import Image from 'next/image';
 import { trackCarView, trackLike, trackComment, trackShare } from '@/lib/analytics';
 import { useCarMedia } from '@/hooks/useCarMedia';
+import { CustomVideoPlayer } from './CustomVideoPlayer';
 
 interface CarPostProps {
   car: Car;
@@ -69,24 +70,6 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
       }
     };
   }, [car.id, car.make, car.model, car.year, car.price, hasTrackedView]);
-
-  useEffect(() => {
-    if (videoRef.current && isInView) {
-      videoRef.current.preload = "auto";
-    }
-  }, [isInView]);
-
-  useEffect(() => {
-    if (!videoRef.current || !isInView) return;
-
-    if (isVideoHovered) {
-      videoRef.current.play().catch(() => {
-        // Ignorăm erorile de autoplay (pot apărea din cauza restricțiilor browser-ului)
-      });
-    } else {
-      videoRef.current.pause();
-    }
-  }, [isVideoHovered, isInView]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ro-RO', {
@@ -185,19 +168,13 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
                 onMouseEnter={handleVideoMouseEnter}
                 onMouseLeave={handleVideoMouseLeave}
               >
-                <video
+                <CustomVideoPlayer
                   ref={videoRef}
                   src={videos[0]}
-                  className="w-full h-full object-cover"
-                  loop
-                  muted
-                  playsInline
-                  controls
                   poster={getVideoPoster(videos[0])}
-                  preload="none"
+                  isHovered={isVideoHovered}
+                  isInView={isInView}
                 />
-                {/* Overlay pentru hover */}
-                <div className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${isVideoHovered ? 'opacity-0' : 'opacity-100'}`} />
               </div>
             ) : (
               <button
@@ -331,13 +308,13 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
                 <button
                   key={idx}
                   onClick={() => handleImageClick(idx)}
-                  className="relative w-20 h-14 rounded-lg overflow-hidden border-2 border-transparent hover:border-orange-500 transition-all"
+                  className="relative w-20 h-14 rounded-lg overflow-hidden border-2 border-transparent hover:border-orange-500 transition-all bg-gray-900"
                 >
                   <Image
                     src={image}
                     alt={`Poza ${idx + 1}`}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     sizes="80px"
                   />
                 </button>

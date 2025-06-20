@@ -9,24 +9,44 @@ export function useCarMedia(carId: string, isInView: boolean) {
   const loadingRef = useRef(false);
 
   useEffect(() => {
-    if (isInView && !loaded && !loadingRef.current) {
+    // Only fetch if we have a carId and the component is in view.
+    if (!isInView || !carId || loaded) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchMedia = async () => {
+      if (loadingRef.current) return;
+      
       loadingRef.current = true;
       setLoading(true);
-      
-      carService.getCarMedia(carId)
-        .then((media) => {
+
+      try {
+        const media = await carService.getCarMedia(carId, controller.signal);
+        if (!controller.signal.aborted) {
           setImages(media.images);
           setVideos(media.videos);
           setLoaded(true);
-        })
-        .catch((error) => {
+        }
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
           console.error('Error loading car media:', error);
-        })
-        .finally(() => {
+        }
+      } finally {
+        if (!controller.signal.aborted) {
           setLoading(false);
           loadingRef.current = false;
-        });
-    }
+        }
+      }
+    };
+
+    fetchMedia();
+
+    return () => {
+      controller.abort();
+      loadingRef.current = false; // Reset loading ref on cleanup
+    };
   }, [carId, isInView, loaded]);
 
   return { images, videos, loading, loaded };

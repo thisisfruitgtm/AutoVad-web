@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,11 @@ export function ImageViewer({ images, initialIndex = 0, onClose, isOpen }: Image
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+  const resetZoom = () => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
     resetZoom();
@@ -36,11 +41,6 @@ export function ImageViewer({ images, initialIndex = 0, onClose, isOpen }: Image
 
   const handleZoomOut = () => {
     setScale((prev) => Math.max(prev - 0.5, 1));
-  };
-
-  const resetZoom = () => {
-    setScale(1);
-    setPosition({ x: 0, y: 0 });
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -71,9 +71,18 @@ export function ImageViewer({ images, initialIndex = 0, onClose, isOpen }: Image
     onClose();
   };
 
+  useEffect(() => {
+    setCurrentIndex(initialIndex);
+    resetZoom();
+  }, [initialIndex, isOpen]);
+
+  if (!isOpen || !images || images.length === 0) {
+    return null;
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-7xl w-full h-[80vh] p-0 gap-0 bg-black/95 border-gray-800">
+      <DialogContent className="max-w-7xl w-full h-[90vh] p-0 gap-0 bg-black/95 border-gray-800">
         <div className="relative flex items-center justify-center w-full h-full">
           {/* Close button */}
           <button
@@ -119,7 +128,7 @@ export function ImageViewer({ images, initialIndex = 0, onClose, isOpen }: Image
           {/* Image container */}
           <div 
             className={cn(
-              "relative w-full h-full flex items-center justify-center",
+              "relative w-full h-full flex items-center justify-center overflow-hidden",
               isDragging ? "cursor-grabbing" : scale > 1 ? "cursor-grab" : "cursor-default"
             )}
             onMouseDown={handleMouseDown}
@@ -130,15 +139,14 @@ export function ImageViewer({ images, initialIndex = 0, onClose, isOpen }: Image
             <Image
               src={images[currentIndex]}
               alt={`Image ${currentIndex + 1}`}
-              className="max-w-full max-h-full object-contain transition-transform duration-200"
+              className="object-contain transition-transform duration-200"
               style={{
                 transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
                 pointerEvents: isDragging ? 'none' : 'auto'
               }}
               draggable={false}
-              fill={false}
-              width={800}
-              height={600}
+              fill
+              sizes="90vw"
             />
           </div>
 

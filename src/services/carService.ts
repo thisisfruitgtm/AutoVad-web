@@ -60,9 +60,9 @@ export const carService = {
     }
   },
 
-  async getCarMedia(carId: string): Promise<{ images: string[], videos: string[] }> {
+  async getCarMedia(carId: string, signal?: AbortSignal): Promise<{ images: string[], videos: string[] }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/cars/${carId}?images=true`);
+      const response = await fetch(`${API_BASE_URL}/cars/${carId}?images=true`, { signal });
       if (!response.ok) {
         throw new Error('Failed to fetch car media');
       }
@@ -72,6 +72,10 @@ export const carService = {
         videos: result.data?.videos || []
       };
     } catch (error) {
+      if ((error as Error).name === 'AbortError') {
+        console.log('Fetch aborted for car media');
+        return { images: [], videos: [] };
+      }
       console.error('Error fetching car media:', error);
       return { images: [], videos: [] };
     }
