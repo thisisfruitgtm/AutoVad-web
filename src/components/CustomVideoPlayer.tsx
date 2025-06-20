@@ -98,7 +98,7 @@ export const CustomVideoPlayer = forwardRef<HTMLVideoElement, CustomVideoPlayerP
     const container = containerRef.current;
     if (!container) return;
     if (!document.fullscreenElement) {
-      container.requestFullscreen().catch(err => {
+      container.requestFullscreen().catch((err) => {
         alert(`Error: ${err.message}`);
       });
     } else {
