@@ -4,6 +4,9 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
+// Prevent pre-rendering for auth callback page
+export const dynamic = 'force-dynamic';
+
 export default function AuthCallback() {
   const router = useRouter();
 

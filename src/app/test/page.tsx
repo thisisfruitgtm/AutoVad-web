@@ -13,6 +13,9 @@ import { CarFilters } from '@/components/CarFilters';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthForm } from '@/components/AuthForm';
 
+// Prevent pre-rendering for test page that uses Supabase
+export const dynamic = 'force-dynamic';
+
 export default function TestPage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [filteredCars, setFilteredCars] = useState<Car[]>([]);
