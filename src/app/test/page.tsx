@@ -10,6 +10,7 @@ import { Search, RefreshCw, Filter, User, LogIn, Star, Shield, Zap, Home as Home
 import Link from 'next/link';
 import Image from 'next/image';
 import { CarFilters } from '@/components/CarFilters';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function TestPage() {
   const [cars, setCars] = useState<Car[]>([]);
@@ -17,7 +18,7 @@ export default function TestPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [user] = useState<{ name?: string; email?: string } | null>(null); // TODO: Replace with useAuth
+  const { user, signInWithGoogle, signOut } = useAuth();
 
   const formatMileage = (mileage: number) => {
     return new Intl.NumberFormat('ro-RO').format(mileage) + ' km';
@@ -185,6 +186,14 @@ export default function TestPage() {
                       <Settings className="w-4 h-4 mr-3" />
                       Setări
                     </Button>
+                    <Button 
+                      onClick={signOut}
+                      variant="ghost" 
+                      className="w-full justify-start text-red-500 hover:bg-red-500/10 hover:text-red-500"
+                    >
+                      <LogIn className="w-4 h-4 mr-3" />
+                      Deconectare
+                    </Button>
                   </nav>
                 </div>
 
@@ -197,8 +206,7 @@ export default function TestPage() {
                         <User className="w-7 h-7 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-semibold text-white">{user.name || 'Utilizator'}</h3>
-                        <p className="text-gray-400 text-xs">{user.email}</p>
+                        <h3 className="text-sm font-semibold text-white">{user.email}</h3>
                       </div>
                     </div>
                     
@@ -234,9 +242,12 @@ export default function TestPage() {
                     </p>
                   </div>
 
-                  <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white mb-6 py-5 rounded-lg font-medium">
+                  <Button 
+                    onClick={signInWithGoogle}
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white mb-6 py-5 rounded-lg font-medium"
+                  >
                     <LogIn className="w-4 h-4 mr-2" />
-                    Conectează-te
+                    Conectează-te cu Google
                   </Button>
                   
                   {/* Benefits */}
@@ -508,6 +519,14 @@ export default function TestPage() {
                     <Settings className="w-4 h-4 mr-3" />
                     Setări
                   </Button>
+                  <Button 
+                    onClick={signOut}
+                    variant="ghost" 
+                    className="w-full justify-start text-red-500 hover:bg-red-500/10 hover:text-red-500"
+                  >
+                    <LogIn className="w-4 h-4 mr-3" />
+                    Deconectare
+                  </Button>
                 </nav>
               </div>
 
@@ -520,8 +539,7 @@ export default function TestPage() {
                       <User className="w-7 h-7 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-white">{user.name || 'Utilizator'}</h3>
-                      <p className="text-gray-400 text-xs">{user.email}</p>
+                      <h3 className="text-sm font-semibold text-white">{user.email}</h3>
                     </div>
                   </div>
                   
@@ -557,9 +575,12 @@ export default function TestPage() {
                   </p>
                 </div>
                 
-                <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white mb-6 py-5 rounded-lg font-medium">
+                <Button 
+                  onClick={signInWithGoogle}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white mb-6 py-5 rounded-lg font-medium"
+                >
                   <LogIn className="w-4 h-4 mr-2" />
-                  Conectează-te
+                  Conectează-te cu Google
                 </Button>
                 
                 {/* Benefits */}

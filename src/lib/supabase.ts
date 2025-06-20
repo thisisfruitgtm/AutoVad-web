@@ -12,22 +12,6 @@ console.log('  URL:', supabaseUrl);
 console.log('  Key exists:', !!supabaseAnonKey);
 console.log('  Key length:', supabaseAnonKey.length);
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: false,
-    detectSessionInUrl: false,
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'autovad-web-app',
-    },
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10,
-    },
-  },
-});
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 console.log('✅ Supabase client created successfully'); 
