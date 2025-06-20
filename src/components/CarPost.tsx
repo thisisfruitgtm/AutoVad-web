@@ -38,13 +38,14 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
       }
     );
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const ref = containerRef.current;
+    if (ref) {
+      observer.observe(ref);
     }
 
     return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
+      if (ref) {
+        observer.unobserve(ref);
       }
     };
   }, []);

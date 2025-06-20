@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -71,7 +71,7 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
   }, [cars]);
 
   // Apply filters to cars
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = cars;
 
     // Search query filter
@@ -122,7 +122,7 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
     }
 
     onFiltersChange(filtered);
-  };
+  }, [cars, searchQuery, selectedMake, selectedYear, selectedFuelType, selectedBodyType, selectedLocation, selectedPriceRange, filterOptions.priceRanges, onFiltersChange]);
 
   // Clear all filters
   const clearFilters = () => {
@@ -138,7 +138,7 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
   // Apply filters when any filter changes
   useEffect(() => {
     applyFilters();
-  }, [searchQuery, selectedMake, selectedYear, selectedFuelType, selectedBodyType, selectedLocation, selectedPriceRange, cars]);
+  }, [applyFilters]);
 
   const SelectFilter = ({ title, value, onChange, options }: {
     title: string;
