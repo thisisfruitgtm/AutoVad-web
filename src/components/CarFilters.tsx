@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, Filter, X } from 'lucide-react';
 import { Car } from '@/types/car';
+import { trackSearch, trackFilter } from '@/lib/analytics';
 
 interface FilterOptions {
   makes: string[];
@@ -32,6 +33,9 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
   const [selectedBodyType, setSelectedBodyType] = useState<string>('All');
   const [selectedLocation, setSelectedLocation] = useState<string>('All');
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('All');
+  
+  // Track previous filter states for analytics
+  const [previousFilters, setPreviousFilters] = useState<Record<string, any>>({});
   
   // Filter options
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -124,6 +128,50 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
     onFiltersChange(filtered);
   }, [cars, searchQuery, selectedMake, selectedYear, selectedFuelType, selectedBodyType, selectedLocation, selectedPriceRange, filterOptions.priceRanges, onFiltersChange]);
 
+  // Track search when query changes
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const currentFilters = {
+        make: selectedMake,
+        year: selectedYear,
+        fuelType: selectedFuelType,
+        bodyType: selectedBodyType,
+        location: selectedLocation,
+        priceRange: selectedPriceRange,
+      };
+
+      trackSearch({
+        query: searchQuery,
+        filters: currentFilters,
+        resultsCount: cars.filter(car => 
+          car.make.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          car.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          `${car.make} ${car.model}`.toLowerCase().includes(searchQuery.toLowerCase())
+        ).length,
+      });
+    }
+  }, [searchQuery, selectedMake, selectedYear, selectedFuelType, selectedBodyType, selectedLocation, selectedPriceRange, cars]);
+
+  // Track filter changes
+  const trackFilterChange = (filterType: string, filterValue: any) => {
+    const currentFilters = {
+      make: selectedMake,
+      year: selectedYear,
+      fuelType: selectedFuelType,
+      bodyType: selectedBodyType,
+      location: selectedLocation,
+      priceRange: selectedPriceRange,
+    };
+
+    trackFilter({
+      filterType,
+      filterValue,
+      previousFilters,
+    });
+
+    setPreviousFilters(currentFilters);
+  };
+
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery('');
@@ -133,6 +181,13 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
     setSelectedBodyType('All');
     setSelectedLocation('All');
     setSelectedPriceRange('All');
+    
+    // Track filter clear
+    trackFilter({
+      filterType: 'clear_all',
+      filterValue: 'all_filters_cleared',
+      previousFilters,
+    });
   };
 
   // Apply filters when any filter changes
@@ -140,11 +195,12 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
     applyFilters();
   }, [applyFilters]);
 
-  const SelectFilter = ({ title, value, onChange, options }: {
+  const SelectFilter = ({ title, value, onChange, options, filterType }: {
     title: string;
     value: string;
     onChange: (value: string) => void;
     options: string[];
+    filterType: string;
   }) => (
     <div className="mb-4">
       <label className="block text-sm font-semibold text-white mb-2 uppercase tracking-wider">
@@ -152,7 +208,13 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
       </label>
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          const newValue = e.target.value;
+          onChange(newValue);
+          if (newValue !== 'All') {
+            trackFilterChange(filterType, newValue);
+          }
+        }}
         className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white text-sm focus:border-orange-500 focus:outline-none"
       >
         {options.map((option) => (
@@ -171,7 +233,13 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
       </label>
       <select
         value={selectedPriceRange}
-        onChange={(e) => setSelectedPriceRange(e.target.value)}
+        onChange={(e) => {
+          const newValue = e.target.value;
+          setSelectedPriceRange(newValue);
+          if (newValue !== 'All') {
+            trackFilterChange('price_range', newValue);
+          }
+        }}
         className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white text-sm focus:border-orange-500 focus:outline-none"
       >
         {filterOptions.priceRanges.map((range) => (
@@ -199,79 +267,85 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Filter className="w-5 h-5 text-orange-500" />
-          <h2 className="text-lg font-semibold text-white">Filtre</h2>
+          <h3 className="text-lg font-semibold text-white">Filtre</h3>
           {activeFiltersCount > 0 && (
-            <Badge className="bg-orange-500 text-white">
+            <Badge variant="secondary" className="bg-orange-500 text-white">
               {activeFiltersCount}
             </Badge>
           )}
         </div>
+        {activeFiltersCount > 0 && (
+          <Button
+            onClick={clearFilters}
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 hover:text-white"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        )}
       </div>
 
       {/* Search */}
       <div className="mb-6">
+        <label className="block text-sm font-semibold text-white mb-2 uppercase tracking-wider">
+          Caută
+        </label>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input
             type="text"
-            placeholder="Caută după marcă, model..."
+            placeholder="Marca, model..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 focus:border-orange-500"
+            className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-500"
           />
         </div>
       </div>
 
-      {/* Filters - Using selects for better space efficiency */}
-      <div className="space-y-2">
+      {/* Filters */}
+      <div className="space-y-4">
         <SelectFilter
-          title="Marcă"
+          title="Marca"
           value={selectedMake}
           onChange={setSelectedMake}
           options={filterOptions.makes}
+          filterType="make"
         />
-
+        
         <SelectFilter
           title="An"
           value={selectedYear}
           onChange={setSelectedYear}
           options={filterOptions.years}
+          filterType="year"
         />
-
-        <PriceRangeSection />
-
+        
         <SelectFilter
           title="Combustibil"
           value={selectedFuelType}
           onChange={setSelectedFuelType}
           options={filterOptions.fuelTypes}
+          filterType="fuel_type"
         />
-
+        
         <SelectFilter
           title="Tip Caroserie"
           value={selectedBodyType}
           onChange={setSelectedBodyType}
           options={filterOptions.bodyTypes}
+          filterType="body_type"
         />
-
+        
         <SelectFilter
           title="Locație"
           value={selectedLocation}
           onChange={setSelectedLocation}
           options={filterOptions.locations}
+          filterType="location"
         />
-
-        {/* Clear Filters */}
-        {activeFiltersCount > 0 && (
-          <Button
-            onClick={clearFilters}
-            variant="outline"
-            className="w-full border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white mt-4"
-          >
-            <X className="w-4 h-4 mr-2" />
-            Șterge Filtrele
-          </Button>
-        )}
+        
+        <PriceRangeSection />
       </div>
     </div>
   );

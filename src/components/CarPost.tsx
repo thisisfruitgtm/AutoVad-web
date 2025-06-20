@@ -5,6 +5,7 @@ import { Heart, MessageCircle, Share, MapPin, Fuel, Gauge, User, Shield } from '
 import { useState, useRef, useEffect } from 'react';
 import { ImageViewer } from './ImageViewer';
 import Image from 'next/image';
+import { trackCarView, trackLike, trackComment, trackShare } from '@/lib/analytics';
 
 interface CarPostProps {
   car: Car;
@@ -21,6 +22,7 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isInView, setIsInView] = useState(false);
   const [isVideoHovered, setIsVideoHovered] = useState(false);
+  const [hasTrackedView, setHasTrackedView] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +31,20 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
       (entries) => {
         entries.forEach((entry) => {
           setIsInView(entry.isIntersecting);
+          
+          // Track car view when it comes into view for the first time
+          if (entry.isIntersecting && !hasTrackedView) {
+            trackCarView({
+              carId: car.id,
+              carTitle: `${car.make} ${car.model}`,
+              carBrand: car.make,
+              carModel: car.model,
+              carYear: car.year,
+              carPrice: car.price,
+              source: 'browse',
+            });
+            setHasTrackedView(true);
+          }
         });
       },
       {
@@ -48,7 +64,7 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
         observer.unobserve(ref);
       }
     };
-  }, []);
+  }, [car.id, car.make, car.model, car.year, car.price, hasTrackedView]);
 
   useEffect(() => {
     if (videoRef.current && isInView) {
@@ -82,7 +98,37 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
 
   const handleLike = () => {
     setIsLiked(!isLiked);
+    
+    // Track like/unlike action
+    trackLike({
+      carId: car.id,
+      carTitle: `${car.make} ${car.model}`,
+      action: isLiked ? 'unlike' : 'like',
+    });
+    
     onLike?.(car.id);
+  };
+
+  const handleComment = () => {
+    // Track comment action
+    trackComment({
+      carId: car.id,
+      carTitle: `${car.make} ${car.model}`,
+      action: 'add',
+    });
+    
+    onComment?.(car.id);
+  };
+
+  const handleShare = () => {
+    // Track share action
+    trackShare({
+      carId: car.id,
+      carTitle: `${car.make} ${car.model}`,
+      platform: 'copy_link',
+    });
+    
+    onShare?.(car.id);
   };
 
   const handleImageClick = (index: number) => {
@@ -237,7 +283,7 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
                     </button>
 
                     <button
-                      onClick={() => onComment?.(car.id)}
+                      onClick={handleComment}
                       className="flex flex-col items-center gap-1.5 sm:gap-2 text-white hover:text-orange-500 transition-all duration-300 group"
                     >
                       <div className="p-1.5 sm:p-2 rounded-full bg-gray-800/80 backdrop-blur-sm group-hover:bg-orange-500/10 transition-all duration-300">
@@ -247,7 +293,7 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
                     </button>
 
                     <button
-                      onClick={() => onShare?.(car.id)}
+                      onClick={handleShare}
                       className="flex flex-col items-center gap-1.5 sm:gap-2 text-white hover:text-orange-500 transition-all duration-300 group"
                     >
                       <div className="p-1.5 sm:p-2 rounded-full bg-gray-800/80 backdrop-blur-sm group-hover:bg-orange-500/10 transition-all duration-300">

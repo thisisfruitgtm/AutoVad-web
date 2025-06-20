@@ -9,6 +9,7 @@ export function middleware() {
     [
       "default-src 'self'",
       "img-src 'self' data: https: mktfybjfxzhvpmnepshq.supabase.co images.pexels.com",
+      "media-src 'self' https: mktfybjfxzhvpmnepshq.supabase.co",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' https: data:",

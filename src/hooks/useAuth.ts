@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { trackAuth } from '@/lib/analytics';
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -70,8 +71,28 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    router.refresh();
+    try {
+      await supabase.auth.signOut();
+      
+      // Track successful logout
+      trackAuth({
+        method: 'email',
+        action: 'logout',
+        success: true,
+      });
+      
+      router.refresh();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'A apărut o eroare';
+      
+      // Track failed logout
+      trackAuth({
+        method: 'email',
+        action: 'logout',
+        success: false,
+        error: errorMessage,
+      });
+    }
   };
 
   return { session, user, loading, signIn, signUp, signInWithGoogle, signOut };
