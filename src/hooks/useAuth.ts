@@ -30,6 +30,33 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const signIn = async (email: string, password: string) => {
+    return await supabase.auth.signInWithPassword({ email, password });
+  };
+
+  const signUp = async (email: string, password: string, name: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+        },
+      },
+    });
+
+    if (data.user && !error) {
+      // Create user profile
+      await supabase.from('users').insert({
+        id: data.user.id,
+        email: data.user.email!,
+        name,
+      });
+    }
+
+    return { data, error };
+  };
+
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -47,5 +74,5 @@ export function useAuth() {
     router.refresh();
   };
 
-  return { session, user, loading, signInWithGoogle, signOut };
+  return { session, user, loading, signIn, signUp, signInWithGoogle, signOut };
 } 
