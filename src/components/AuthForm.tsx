@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { Heart, Tag, Shield, Star, Zap, LogIn, Mail, User as UserIcon, Lock } from 'lucide-react';
+import { Heart, Tag, Shield, Star, Zap, Mail, User as UserIcon, Lock } from 'lucide-react';
 
 export function AuthForm() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -29,8 +29,9 @@ export function AuthForm() {
         const { error } = await signUp(email, password, name);
         if (error) throw error;
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'A apărut o eroare';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
