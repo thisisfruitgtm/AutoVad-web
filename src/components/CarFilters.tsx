@@ -54,25 +54,107 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
     ],
   });
 
-  // Generate filter options from cars data
-  useEffect(() => {
-    if (cars.length > 0) {
-      const makes = Array.from(new Set(cars.map(car => car.make))).sort();
-      const years = Array.from(new Set(cars.map(car => car.year.toString()))).sort((a, b) => parseInt(b) - parseInt(a));
-      const fuelTypes = Array.from(new Set(cars.map(car => car.fuel_type))).sort();
-      const bodyTypes = Array.from(new Set(cars.map(car => car.body_type))).sort();
-      const locations = Array.from(new Set(cars.map(car => car.location.split(',')[0].trim()))).sort();
+  // Generate dynamic filter options based on current selections
+  const generateDynamicFilterOptions = useCallback(() => {
+    if (cars.length === 0) return;
 
-      setFilterOptions(prev => ({
-        ...prev,
-        makes: ['All', ...makes],
-        years: ['All', ...years],
-        fuelTypes: ['All', ...fuelTypes],
-        bodyTypes: ['All', ...bodyTypes],
-        locations: ['All', ...locations],
-      }));
+    let filteredCars = cars;
+
+    // Apply search filter first
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filteredCars = filteredCars.filter(car => 
+        car.make.toLowerCase().includes(query) ||
+        car.model.toLowerCase().includes(query) ||
+        `${car.make} ${car.model}`.toLowerCase().includes(query)
+      );
     }
-  }, [cars]);
+
+    // Apply make filter
+    if (selectedMake !== 'All') {
+      filteredCars = filteredCars.filter(car => car.make === selectedMake);
+    }
+
+    // Apply year filter
+    if (selectedYear !== 'All') {
+      filteredCars = filteredCars.filter(car => car.year.toString() === selectedYear);
+    }
+
+    // Apply fuel type filter
+    if (selectedFuelType !== 'All') {
+      filteredCars = filteredCars.filter(car => car.fuel_type === selectedFuelType);
+    }
+
+    // Apply body type filter
+    if (selectedBodyType !== 'All') {
+      filteredCars = filteredCars.filter(car => car.body_type === selectedBodyType);
+    }
+
+    // Apply location filter
+    if (selectedLocation !== 'All') {
+      filteredCars = filteredCars.filter(car => car.location.includes(selectedLocation));
+    }
+
+    // Generate options from the filtered cars
+    const makes = Array.from(new Set(cars.map(car => car.make))).sort();
+    const years = Array.from(new Set(filteredCars.map(car => car.year.toString()))).sort((a, b) => parseInt(b) - parseInt(a));
+    const fuelTypes = Array.from(new Set(filteredCars.map(car => car.fuel_type))).sort();
+    const bodyTypes = Array.from(new Set(filteredCars.map(car => car.body_type))).sort();
+    const locations = Array.from(new Set(filteredCars.map(car => car.location.split(',')[0].trim()))).sort();
+
+    setFilterOptions(prev => ({
+      ...prev,
+      makes: ['All', ...makes],
+      years: ['All', ...years],
+      fuelTypes: ['All', ...fuelTypes],
+      bodyTypes: ['All', ...bodyTypes],
+      locations: ['All', ...locations],
+    }));
+  }, [cars, searchQuery, selectedMake, selectedYear, selectedFuelType, selectedBodyType, selectedLocation]);
+
+  // Update dynamic filter options when any filter changes
+  useEffect(() => {
+    generateDynamicFilterOptions();
+  }, [generateDynamicFilterOptions]);
+
+  // Reset dependent filters when parent filter changes
+  const handleMakeChange = (value: string) => {
+    setSelectedMake(value);
+    // Reset dependent filters when make changes
+    if (value !== selectedMake) {
+      setSelectedYear('All');
+      setSelectedFuelType('All');
+      setSelectedBodyType('All');
+      setSelectedLocation('All');
+    }
+  };
+
+  const handleYearChange = (value: string) => {
+    setSelectedYear(value);
+    // Reset dependent filters when year changes
+    if (value !== selectedYear) {
+      setSelectedFuelType('All');
+      setSelectedBodyType('All');
+      setSelectedLocation('All');
+    }
+  };
+
+  const handleFuelTypeChange = (value: string) => {
+    setSelectedFuelType(value);
+    // Reset dependent filters when fuel type changes
+    if (value !== selectedFuelType) {
+      setSelectedBodyType('All');
+      setSelectedLocation('All');
+    }
+  };
+
+  const handleBodyTypeChange = (value: string) => {
+    setSelectedBodyType(value);
+    // Reset dependent filters when body type changes
+    if (value !== selectedBodyType) {
+      setSelectedLocation('All');
+    }
+  };
 
   // Apply filters to cars
   const applyFilters = useCallback(() => {
@@ -308,7 +390,7 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
         <SelectFilter
           title="Marca"
           value={selectedMake}
-          onChange={setSelectedMake}
+          onChange={handleMakeChange}
           options={filterOptions.makes}
           filterType="make"
         />
@@ -316,7 +398,7 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
         <SelectFilter
           title="An"
           value={selectedYear}
-          onChange={setSelectedYear}
+          onChange={handleYearChange}
           options={filterOptions.years}
           filterType="year"
         />
@@ -324,7 +406,7 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
         <SelectFilter
           title="Combustibil"
           value={selectedFuelType}
-          onChange={setSelectedFuelType}
+          onChange={handleFuelTypeChange}
           options={filterOptions.fuelTypes}
           filterType="fuel_type"
         />
@@ -332,7 +414,7 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
         <SelectFilter
           title="Tip Caroserie"
           value={selectedBodyType}
-          onChange={setSelectedBodyType}
+          onChange={handleBodyTypeChange}
           options={filterOptions.bodyTypes}
           filterType="body_type"
         />
