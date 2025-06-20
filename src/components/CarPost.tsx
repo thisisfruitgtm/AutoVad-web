@@ -187,7 +187,7 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
                 className="w-full h-full"
               >
                 <Image
-                  src={car.images[0] || '/placeholder-car.jpg'}
+                  src={car.images[0] || 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800'}
                   alt={`${car.make} ${car.model}`}
                   className="w-full h-full object-cover"
                   fill
