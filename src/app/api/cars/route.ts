@@ -46,10 +46,10 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
     
     // Optimize query to select only necessary fields and limit results
-    let url = `${SUPABASE_URL}/rest/v1/cars?select=id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count&order=created_at.desc&limit=${limit}&offset=${offset}`;
+    let url = `${SUPABASE_URL}/rest/v1/cars?select=id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count,images,videos&order=created_at.desc&limit=${limit}&offset=${offset}`;
     
     if (query) {
-      url = `${SUPABASE_URL}/rest/v1/cars?select=id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count&or=(make.ilike.%25${query}%25,model.ilike.%25${query}%25)&order=created_at.desc&limit=${limit}&offset=${offset}`;
+      url = `${SUPABASE_URL}/rest/v1/cars?select=id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count,images,videos&or=(make.ilike.%25${query}%25,model.ilike.%25${query}%25)&order=created_at.desc&limit=${limit}&offset=${offset}`;
     }
     
     const response = await fetch(url, {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Car } from '@/types/car';
 import { carService } from '@/services/carService';
 import { CarPost } from '@/components/CarPost';
@@ -90,9 +90,9 @@ export default function TestPage() {
     console.log('Share car:', carId);
   };
 
-  const handleFiltersChange = (filtered: Car[]) => {
+  const handleFiltersChange = useCallback((filtered: Car[]) => {
     setFilteredCars(filtered);
-  };
+  }, []);
 
   if (loading || authLoading) {
     return (
