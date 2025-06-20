@@ -6,7 +6,7 @@ import { carService } from '@/services/carService';
 import { CarPost } from '@/components/CarPost';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, RefreshCw, Filter, User, LogIn, Star, Shield, Zap, Home as HomeIcon, Heart, Settings, Gauge, Fuel, MapPin, Share, ArrowLeft } from 'lucide-react';
+import { Search, RefreshCw, Filter, User, LogIn, Star, Shield, Zap, Home as HomeIcon, Heart, Settings, Gauge, Fuel, MapPin, Share, ArrowLeft, Tag } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CarFilters } from '@/components/CarFilters';
@@ -92,7 +92,7 @@ export default function TestPage() {
   };
 
   if (loading) {
-    return (
+  return (
       <div className="min-h-screen bg-black">
         {/* Header */}
         <header className="sticky top-0 z-40 bg-black/95 backdrop-blur-sm border-b border-gray-800">
@@ -143,34 +143,12 @@ export default function TestPage() {
         {/* Main Content - Fixed Layout */}
         <div className="max-w-[1640px] flex h-[calc(100vh-76px)] mx-auto">
           
-          {/* Left Sidebar - Navigation + Filters */}
+          {/* Left Sidebar - Filters */}
           <div className="w-80 bg-black/50 border-r border-gray-800 p-6 flex-shrink-0">
-            {/* Navigation Menu */}
-            <div className="mb-8">
-              <nav className="space-y-2">
-                <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-800/50 font-medium">
-                  <HomeIcon className="w-4 h-4 mr-3" />
-                  Feed
-                </Button>
-                <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-                  <Heart className="w-4 h-4 mr-3" />
-                  Favorite
-                </Button>
-                <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-                  <User className="w-4 h-4 mr-3" />
-                  Profilul meu
-                </Button>
-                <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-                  <Settings className="w-4 h-4 mr-3" />
-                  Setări
-                </Button>
-              </nav>
-            </div>
-
-            {/* Filters */}
             <CarFilters 
               cars={cars} 
               onFiltersChange={handleFiltersChange}
+              className="sticky top-6"
             />
           </div>
 
@@ -184,71 +162,109 @@ export default function TestPage() {
 
           {/* Right Sidebar - Fixed */}
           <div className="w-72 bg-black/50 border-l border-gray-800 p-6 flex-shrink-0">
-            <h2 className="text-xl font-bold text-white mb-6">Profil</h2>
             
             {user ? (
-              // User Profile
-              <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center">
-                    <User className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-white">{user.name || 'Utilizator'}</h3>
-                    <p className="text-gray-400 text-xs">{user.email}</p>
+              <>
+                {/* Navigation Menu */}
+                <div className="mb-8">
+                  <h2 className="text-xl font-bold text-white mb-6">Meniu</h2>
+                  <nav className="space-y-2">
+                    <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-800/50 font-medium">
+                      <HomeIcon className="w-4 h-4 mr-3" />
+                      Feed
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                      <Heart className="w-4 h-4 mr-3" />
+                      Favorite
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                      <User className="w-4 h-4 mr-3" />
+                      Profilul meu
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                      <Settings className="w-4 h-4 mr-3" />
+                      Setări
+                    </Button>
+                  </nav>
+                </div>
+
+                {/* User Profile */}
+                <div>
+                  <h2 className="text-xl font-bold text-white mb-6">Profil</h2>
+                  <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center">
+                        <User className="w-7 h-7 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-white">{user.name || 'Utilizator'}</h3>
+                        <p className="text-gray-400 text-xs">{user.email}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 text-sm">Anunțuri</span>
+                        <span className="text-white font-semibold text-sm">0</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 text-sm">Vândute</span>
+                        <span className="text-white font-semibold text-sm">0</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 text-sm">Rating</span>
+                        <span className="text-white font-semibold text-sm">⭐ 5.0</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm">Anunțuri</span>
-                    <span className="text-white font-semibold text-sm">0</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm">Vândute</span>
-                    <span className="text-white font-semibold text-sm">0</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm">Rating</span>
-                    <span className="text-white font-semibold text-sm">⭐ 5.0</span>
-                  </div>
-                </div>
-              </div>
+              </>
             ) : (
               // Login Invitation
-              <div className="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <LogIn className="w-8 h-8 text-white" />
+              <>
+                <h2 className="text-xl font-bold text-white mb-6">Profil</h2>
+                <div className="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <LogIn className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-base font-semibold text-white mb-2">Conectează-te</h3>
+                    <p className="text-gray-400 text-sm">
+                      Pentru a-ți debloca toate funcționalitățile
+                    </p>
                   </div>
-                  <h3 className="text-base font-semibold text-white mb-2">Conectează-te</h3>
-                  <p className="text-gray-400 text-sm">
-                    Pentru a-ți vedea profilul
-                  </p>
+
+                  <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white mb-6 py-5 rounded-lg font-medium">
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Conectează-te
+                  </Button>
+                  
+                  {/* Benefits */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-white mb-3">Beneficii:</h4>
+                    <div className="flex items-center gap-3 text-sm text-gray-300">
+                      <Heart className="w-4 h-4 text-orange-500" />
+                      <span>Salvează favorite</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-gray-300">
+                      <Tag className="w-4 h-4 text-orange-500" />
+                      <span>Vinde propria mașină</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-gray-300">
+                      <Shield className="w-4 h-4 text-orange-500" />
+                      <span>Profil verificat</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-gray-300">
+                      <Star className="w-4 h-4 text-orange-500" />
+                      <span>Rating și recenzii</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-gray-300">
+                      <Zap className="w-4 h-4 text-orange-500" />
+                      <span>Anunțuri prioritare</span>
+                    </div>
+                  </div>
                 </div>
-                
-                <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white mb-6 py-5 rounded-lg font-medium">
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Conectează-te
-                </Button>
-                
-                {/* Benefits */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-white mb-3">Beneficii:</h4>
-                  <div className="flex items-center gap-3 text-sm text-gray-300">
-                    <Shield className="w-4 h-4 text-orange-500" />
-                    <span>Profil verificat</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-300">
-                    <Star className="w-4 h-4 text-orange-500" />
-                    <span>Rating și recenzii</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-300">
-                    <Zap className="w-4 h-4 text-orange-500" />
-                    <span>Anunțuri prioritare</span>
-                  </div>
-                </div>
-              </div>
+              </>
             )}
           </div>
         </div>
@@ -307,34 +323,12 @@ export default function TestPage() {
       {/* Main Content - Fixed Layout */}
       <div className="max-w-[1640px] flex h-[calc(100vh-76px)] mx-auto">
         
-        {/* Left Sidebar - Navigation + Filters */}
+        {/* Left Sidebar - Filters */}
         <div className="w-80 bg-black/50 border-r border-gray-800 p-6 flex-shrink-0">
-          {/* Navigation Menu */}
-          <div className="mb-8">
-            <nav className="space-y-2">
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-800/50 font-medium">
-                <HomeIcon className="w-4 h-4 mr-3" />
-                Feed
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-                <Heart className="w-4 h-4 mr-3" />
-                Favorite
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-                <User className="w-4 h-4 mr-3" />
-                Profilul meu
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
-                <Settings className="w-4 h-4 mr-3" />
-                Setări
-              </Button>
-            </nav>
-          </div>
-
-          {/* Filters */}
           <CarFilters 
             cars={cars} 
             onFiltersChange={handleFiltersChange}
+            className="sticky top-6"
           />
         </div>
 
@@ -435,7 +429,7 @@ export default function TestPage() {
                           </h3>
                           <div className="grid grid-cols-4 gap-3">
                             {car.images.map((image, index) => (
-                              <button 
+      <button 
                                 key={index}
                                 className="relative group aspect-video bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-orange-500 transition-all"
                               >
@@ -477,7 +471,7 @@ export default function TestPage() {
                             </div>
                             <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
                               Contactează
-                            </button>
+      </button>
                           </div>
                         </div>
                       </div>
@@ -491,71 +485,109 @@ export default function TestPage() {
 
         {/* Right Sidebar - Fixed */}
         <div className="w-72 bg-black/50 border-l border-gray-800 p-6 flex-shrink-0">
-          <h2 className="text-xl font-bold text-white mb-6">Profil</h2>
           
           {user ? (
-            // User Profile
-            <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center">
-                  <User className="w-7 h-7 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-white">{user.name || 'Utilizator'}</h3>
-                  <p className="text-gray-400 text-xs">{user.email}</p>
+            <>
+              {/* Navigation Menu */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-white mb-6">Meniu</h2>
+                <nav className="space-y-2">
+                  <Button variant="ghost" className="w-full justify-start text-white hover:bg-gray-800/50 font-medium">
+                    <HomeIcon className="w-4 h-4 mr-3" />
+                    Feed
+                  </Button>
+                  <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                    <Heart className="w-4 h-4 mr-3" />
+                    Favorite
+                  </Button>
+                  <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                    <User className="w-4 h-4 mr-3" />
+                    Profilul meu
+                  </Button>
+                  <Button variant="ghost" className="w-full justify-start text-gray-400 hover:bg-gray-800/50 hover:text-white">
+                    <Settings className="w-4 h-4 mr-3" />
+                    Setări
+                  </Button>
+                </nav>
+              </div>
+
+              {/* User Profile */}
+              <div>
+                <h2 className="text-xl font-bold text-white mb-6">Profil</h2>
+                <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center">
+                      <User className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-white">{user.name || 'Utilizator'}</h3>
+                      <p className="text-gray-400 text-xs">{user.email}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300 text-sm">Anunțuri</span>
+                      <span className="text-white font-semibold text-sm">0</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300 text-sm">Vândute</span>
+                      <span className="text-white font-semibold text-sm">0</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300 text-sm">Rating</span>
+                      <span className="text-white font-semibold text-sm">⭐ 5.0</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm">Anunțuri</span>
-                  <span className="text-white font-semibold text-sm">0</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm">Vândute</span>
-                  <span className="text-white font-semibold text-sm">0</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm">Rating</span>
-                  <span className="text-white font-semibold text-sm">⭐ 5.0</span>
-                </div>
-              </div>
-            </div>
+            </>
           ) : (
             // Login Invitation
-            <div className="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <LogIn className="w-8 h-8 text-white" />
+            <>
+              <h2 className="text-xl font-bold text-white mb-6">Profil</h2>
+              <div className="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <LogIn className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-base font-semibold text-white mb-2">Conectează-te</h3>
+                  <p className="text-gray-400 text-sm">
+                    Pentru a-ți debloca toate funcționalitățile
+                  </p>
                 </div>
-                <h3 className="text-base font-semibold text-white mb-2">Conectează-te</h3>
-                <p className="text-gray-400 text-sm">
-                  Pentru a-ți vedea profilul
-                </p>
+                
+                <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white mb-6 py-5 rounded-lg font-medium">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Conectează-te
+                </Button>
+                
+                {/* Benefits */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-white mb-3">Beneficii:</h4>
+                  <div className="flex items-center gap-3 text-sm text-gray-300">
+                    <Heart className="w-4 h-4 text-orange-500" />
+                    <span>Salvează favorite</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-gray-300">
+                    <Tag className="w-4 h-4 text-orange-500" />
+                    <span>Vinde propria mașină</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-gray-300">
+                    <Shield className="w-4 h-4 text-orange-500" />
+                    <span>Profil verificat</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-gray-300">
+                    <Star className="w-4 h-4 text-orange-500" />
+                    <span>Rating și recenzii</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-gray-300">
+                    <Zap className="w-4 h-4 text-orange-500" />
+                    <span>Anunțuri prioritare</span>
+                  </div>
+                </div>
               </div>
-              
-              <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white mb-6 py-5 rounded-lg font-medium">
-                <LogIn className="w-4 h-4 mr-2" />
-                Conectează-te
-              </Button>
-              
-              {/* Benefits */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-white mb-3">Beneficii:</h4>
-                <div className="flex items-center gap-3 text-sm text-gray-300">
-                  <Shield className="w-4 h-4 text-orange-500" />
-                  <span>Profil verificat</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-gray-300">
-                  <Star className="w-4 h-4 text-orange-500" />
-                  <span>Rating și recenzii</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-gray-300">
-                  <Zap className="w-4 h-4 text-orange-500" />
-                  <span>Anunțuri prioritare</span>
-                </div>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>
