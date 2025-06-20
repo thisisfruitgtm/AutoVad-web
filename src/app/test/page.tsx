@@ -41,9 +41,9 @@ export default function TestPage() {
   const loadCars = async () => {
     try {
       setLoading(true);
-      const data = await carService.getCars();
-      setCars(data);
-      setFilteredCars(data);
+      const result = await carService.getCars();
+      setCars(result.data);
+      setFilteredCars(result.data);
     } catch (error) {
       console.error('Error loading cars:', error);
     } finally {
@@ -65,9 +65,9 @@ export default function TestPage() {
     if (query.trim()) {
       try {
         setLoading(true);
-        const data = await carService.searchCars(query);
-        setCars(data);
-        setFilteredCars(data);
+        const result = await carService.searchCars(query);
+        setCars(result.data);
+        setFilteredCars(result.data);
       } catch (error) {
         console.error('Error searching cars:', error);
       } finally {
@@ -96,10 +96,88 @@ export default function TestPage() {
 
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="animate-spin h-12 w-12 text-orange-500 mx-auto mb-4" />
-          <p className="text-gray-400">Se încarcă...</p>
+      <div className="min-h-screen bg-black">
+        {/* Header */}
+        <header className="sticky top-0 z-40 bg-black/95 backdrop-blur-sm border-b border-gray-800">
+          <div className=" mx-auto px-6 py-3 max-w-[1640px]">
+            <div className="flex items-center justify-between gap-8">
+              <div className="flex items-center gap-4">
+                <Link href="/" className="p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+                <div className="flex-shrink-0">
+                  <h1 className="text-2xl font-bold text-white tracking-tight">AutoVad</h1>
+                  <p className="text-gray-400 text-sm">Marketplace de Mașini</p>
+                </div>
+              </div>
+              
+              {/* Search and Filters */}
+              <div className="flex-1 flex gap-3 max-w-2xl">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    type="text"
+                    placeholder="Caută după marcă sau model..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="pl-10 bg-gray-900/50 border-gray-800 text-white placeholder-gray-500 focus:border-orange-500 w-full"
+                  />
+                </div>
+                <Button 
+                  variant="outline" 
+                  className="border-gray-800 bg-gray-900/50 text-gray-300 hover:border-orange-500 hover:text-orange-500 px-4"
+                >
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filtre
+                </Button>
+              </div>
+
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="p-2 text-gray-400 hover:text-orange-500 transition-colors"
+              >
+                <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content - Fixed Layout */}
+        <div className="max-w-[1640px] flex h-[calc(100vh-76px)] mx-auto">
+          
+          {/* Left Sidebar - Filters */}
+          <div className="w-80 bg-black/50 border-r border-gray-800 p-6 flex-shrink-0">
+            <CarFilters 
+              cars={cars} 
+              onFiltersChange={handleFiltersChange}
+              className="sticky top-6"
+            />
+          </div>
+
+          {/* Center Feed - Loading State */}
+          <div className="flex-1 flex justify-center items-center overflow-y-auto bg-black/30 px-4">
+            <div className="text-center">
+              <RefreshCw className="animate-spin h-12 w-12 text-orange-500 mx-auto mb-4" />
+              <p className="text-gray-400">Se încarcă...</p>
+            </div>
+          </div>
+
+          {/* Right Sidebar - Fixed */}
+          <div className="w-72 bg-black/50 border-l border-gray-800 p-6 flex-shrink-0">
+            <h2 className="text-xl font-bold text-white mb-6">Profil</h2>
+            <div className="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <LogIn className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-base font-semibold text-white mb-2">Conectează-te</h3>
+                <p className="text-gray-400 text-sm">
+                  Pentru a-ți debloca toate funcționalitățile
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

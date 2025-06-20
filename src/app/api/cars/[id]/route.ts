@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
   try {
     const url = request.nextUrl;
     const id = url.pathname.split('/').pop();
+    const includeImages = url.searchParams.get('images') === 'true';
     
     // Validation: ID must exist and be numeric
     if (!id || !/^\d+$/.test(id)) {
@@ -39,7 +40,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/cars?id=eq.${id}&select=*`, {
+    // Select fields based on whether images are needed
+    const selectFields = includeImages 
+      ? 'id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count,images,videos'
+      : 'id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count';
+
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/cars?id=eq.${id}&select=${selectFields}`, {
       method: 'GET',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
@@ -64,6 +70,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: data[0]
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600', // Cache for 5 minutes
+        'CDN-Cache-Control': 'public, max-age=300',
+      }
     });
   } catch (error) {
     console.error('API Error:', error);

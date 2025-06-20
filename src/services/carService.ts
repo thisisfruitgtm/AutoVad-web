@@ -4,17 +4,37 @@ import { trackCarPost } from '@/lib/analytics';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export const carService = {
-  async getCars(): Promise<Car[]> {
+  async getCars(page: number = 1, limit: number = 20): Promise<{ data: Car[], hasMore: boolean, totalCount: number }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/cars`);
+      const response = await fetch(`${API_BASE_URL}/cars?page=${page}&limit=${limit}`);
       if (!response.ok) {
         throw new Error('Failed to fetch cars');
       }
-      const data = await response.json();
-      return data.data || [];
+      const result = await response.json();
+      
+      // Transform data to include default images since we're not fetching images array
+      const transformedCars: Car[] = (result.data || []).map((car: any) => ({
+        ...car,
+        images: car.images || ['https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800'], // Default image
+        videos: car.videos || [],
+        seller: {
+          id: 'autovad-verified',
+          name: 'Autovad Verified',
+          avatar_url: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+          rating: 4.9,
+          verified: true,
+        },
+        is_liked: false,
+      }));
+      
+      return {
+        data: transformedCars,
+        hasMore: result.hasMore || false,
+        totalCount: result.totalCount || 0
+      };
     } catch (error) {
       console.error('Error fetching cars:', error);
-      return [];
+      return { data: [], hasMore: false, totalCount: 0 };
     }
   },
 
@@ -32,17 +52,37 @@ export const carService = {
     }
   },
 
-  async searchCars(query: string): Promise<Car[]> {
+  async searchCars(query: string, page: number = 1, limit: number = 20): Promise<{ data: Car[], hasMore: boolean, totalCount: number }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/cars?search=${encodeURIComponent(query)}`);
+      const response = await fetch(`${API_BASE_URL}/cars?search=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
       if (!response.ok) {
         throw new Error('Failed to search cars');
       }
-      const data = await response.json();
-      return data.data || [];
+      const result = await response.json();
+      
+      // Transform data to include default images since we're not fetching images array
+      const transformedCars: Car[] = (result.data || []).map((car: any) => ({
+        ...car,
+        images: car.images || ['https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800'], // Default image
+        videos: car.videos || [],
+        seller: {
+          id: 'autovad-verified',
+          name: 'Autovad Verified',
+          avatar_url: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+          rating: 4.9,
+          verified: true,
+        },
+        is_liked: false,
+      }));
+      
+      return {
+        data: transformedCars,
+        hasMore: result.hasMore || false,
+        totalCount: result.totalCount || 0
+      };
     } catch (error) {
       console.error('Error searching cars:', error);
-      return [];
+      return { data: [], hasMore: false, totalCount: 0 };
     }
   },
 
