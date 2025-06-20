@@ -3,14 +3,14 @@ import posthog from 'posthog-js';
 // Analytics event types
 export interface SearchEvent {
   query: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, string | number | boolean | undefined>;
   resultsCount?: number;
 }
 
 export interface FilterEvent {
   filterType: string;
-  filterValue: any;
-  previousFilters?: Record<string, any>;
+  filterValue: string | number | boolean;
+  previousFilters?: Record<string, string | number | boolean | undefined>;
 }
 
 export interface CarViewEvent {
@@ -164,15 +164,15 @@ export class Analytics {
   }
 
   // Utility methods
-  static identify(userId: string, properties?: Record<string, any>) {
+  static identify(userId: string, properties?: Record<string, string | number | boolean | null | undefined>) {
     posthog.identify(userId, properties);
   }
 
-  static setUserProperties(properties: Record<string, any>) {
+  static setUserProperties(properties: Record<string, string | number | boolean | null | undefined>) {
     posthog.people.set(properties);
   }
 
-  static trackPageView(pageName: string, properties?: Record<string, any>) {
+  static trackPageView(pageName: string, properties?: Record<string, string | number | boolean | null | undefined>) {
     posthog.capture('page_viewed', {
       page_name: pageName,
       ...properties,
@@ -180,7 +180,7 @@ export class Analytics {
     });
   }
 
-  static trackError(error: Error, context?: Record<string, any>) {
+  static trackError(error: Error, context?: Record<string, unknown>) {
     posthog.capture('error_occurred', {
       error_message: error.message,
       error_stack: error.stack,

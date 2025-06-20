@@ -35,7 +35,7 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('All');
   
   // Track previous filter states for analytics
-  const [previousFilters, setPreviousFilters] = useState<Record<string, any>>({});
+  const [previousFilters, setPreviousFilters] = useState<Record<string, string>>({});
   
   // Filter options
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -153,7 +153,7 @@ export function CarFilters({ cars, onFiltersChange, className = '' }: CarFilters
   }, [searchQuery, selectedMake, selectedYear, selectedFuelType, selectedBodyType, selectedLocation, selectedPriceRange, cars]);
 
   // Track filter changes
-  const trackFilterChange = (filterType: string, filterValue: any) => {
+  const trackFilterChange = (filterType: string, filterValue: string) => {
     const currentFilters = {
       make: selectedMake,
       year: selectedYear,
