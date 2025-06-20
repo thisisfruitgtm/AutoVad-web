@@ -32,10 +32,10 @@ export async function GET(request: NextRequest) {
     const id = url.pathname.split('/').pop();
     const includeImages = url.searchParams.get('images') === 'true';
     
-    // Validation: ID must exist and be numeric
-    if (!id || !/^\d+$/.test(id)) {
+    // Validation: ID must exist and be a valid UUID or numeric
+    if (!id || !(/^\d+$/.test(id) || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))) {
       return NextResponse.json(
-        { success: false, error: 'Invalid car id - must be numeric' },
+        { success: false, error: 'Invalid car id format' },
         { status: 400 }
       );
     }

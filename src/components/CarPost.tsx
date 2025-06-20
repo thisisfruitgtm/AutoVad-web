@@ -157,6 +157,12 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
     verified: true,
   };
 
+  // Helper for thumbnail
+  const getThumbnail = (url: string | undefined) => url ? `${url}?width=200&quality=60` : null;
+
+  // Helper for video poster
+  const getVideoPoster = (url: string | undefined) => url ? `${url}?poster=1` : undefined;
+
   return (
     <>
       <Card 
@@ -187,7 +193,7 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
                   muted
                   playsInline
                   controls
-                  poster={images[0]}
+                  poster={getVideoPoster(videos[0])}
                   preload="none"
                 />
                 {/* Overlay pentru hover */}
@@ -199,7 +205,7 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
                 className="w-full h-full"
               >
                 <Image
-                  src={images[0] || 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800'}
+                  src={displayMode === 'compact' ? (getThumbnail(images[0]) || 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800') : (images[0] || 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800')}
                   alt={`${car.make} ${car.model}`}
                   className="w-full h-full object-cover"
                   fill
