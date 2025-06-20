@@ -100,6 +100,57 @@ npm run lint
 - **Landing Page**: `/` - Colectare email-uri
 - **Marketplace**: `/test` - Site-ul actual (link ascuns)
 
+## 🚀 Instrucțiuni Viitoare
+
+### Optimizări Egress Supabase
+- ✅ **Lazy Loading Media**: Imagini/video încărcate doar când vizibile
+- ✅ **Pagination**: 20 mașini per request (reducere 80% egress)
+- ✅ **Image Transformations**: Thumbnails generate dinamic (200px, quality 60%)
+- ✅ **Video Posters**: Generate automat din primul frame
+- ✅ **Caching**: Headers pentru cache 1-5 minute
+
+### API Endpoints Optimizate
+```typescript
+// Listare - fără media (economie egress)
+GET /api/cars?page=1&limit=20
+
+// Detaliu - cu media (doar când necesar)
+GET /api/cars/[id]?images=true
+
+// Media lazy loading
+const { images, videos } = useCarMedia(carId, isInView);
+```
+
+### Supabase Storage Transformations
+```typescript
+// Thumbnails pentru listare
+const thumbnail = `${imageUrl}?width=200&quality=60`;
+
+// Video posters
+const poster = `${videoUrl}?poster=1`;
+
+// Full resolution pentru detaliu
+const fullImage = imageUrl; // fără parametri
+```
+
+### Monitorizare Egress
+- Verifică Supabase Dashboard > Usage > Egress
+- Target: < 5GB/lună (free tier)
+- Optimizări: Lazy loading, pagination, caching
+
+### Funcționalități Viitoare
+- **CDN Integration**: Cloudflare pentru imagini statice
+- **Progressive Loading**: Skeleton screens în timpul încărcării
+- **Image Compression**: WebP format pentru browser-uri moderne
+- **Video Streaming**: HLS/DASH pentru videoclipuri mari
+- **Offline Support**: Service Worker pentru cache local
+
+### Performance Metrics
+- **Core Web Vitals**: LCP < 2.5s, FID < 100ms, CLS < 0.1
+- **Bundle Size**: < 500KB gzipped
+- **Image Optimization**: WebP + responsive images
+- **Caching Strategy**: Stale-while-revalidate pentru API
+
 ## 👥 Echipa
 
 - **Mihail Marincea** - Full Stack Developer
