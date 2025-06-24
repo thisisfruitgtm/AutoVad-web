@@ -22,6 +22,9 @@ export interface Car {
   views_count: number;
   created_at: string;
   updated_at: string;
+  playback_id?: string;
+  thumbnail_url?: string;
+  asset_ids?: string[];
 }
 
 export interface User {

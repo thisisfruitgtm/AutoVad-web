@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, forwardRef } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize } from 'lucide-react';
+import { HlsPlayer } from './HlsPlayer';
 
 interface CustomVideoPlayerProps {
   src: string;
@@ -120,17 +121,7 @@ export const CustomVideoPlayer = forwardRef<HTMLVideoElement, CustomVideoPlayerP
 
   return (
     <div ref={containerRef} className="relative w-full h-full group/player overflow-hidden bg-black">
-      <video
-        ref={videoRef}
-        src={src}
-        className="w-full h-full object-cover"
-        loop
-        muted
-        playsInline
-        poster={poster}
-        preload="none"
-        onClick={togglePlayPause}
-      />
+      <HlsPlayer src={src} poster={poster} style={{ width: '100%', height: '100%', background: 'black' }} />
       
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 md:p-4 opacity-0 group-hover/player:opacity-100 transition-opacity duration-300">
         <input

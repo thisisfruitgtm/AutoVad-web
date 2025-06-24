@@ -23,6 +23,9 @@ interface RawCarData {
   comments_count: number;
   images?: string[];
   videos?: string[];
+  playback_id?: string;
+  thumbnail_url?: string;
+  asset_ids?: string[];
 }
 
 export const carService = {
@@ -39,6 +42,7 @@ export const carService = {
         ...car,
         images: car.images || [],
         videos: car.videos || [],
+        asset_ids: car.asset_ids || [],
         seller: {
           id: 'autovad-verified',
           name: 'Autovad Verified',
@@ -108,6 +112,7 @@ export const carService = {
         ...car,
         images: car.images || [],
         videos: car.videos || [],
+        asset_ids: car.asset_ids || [],
         seller: {
           id: 'autovad-verified',
           name: 'Autovad Verified',
