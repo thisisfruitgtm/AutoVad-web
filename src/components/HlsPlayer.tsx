@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react';
 import Hls from 'hls.js';
 
-export function HlsPlayer({ src, poster, ...props }: { src: string; poster?: string; [key: string]: any }) {
+export function HlsPlayer({ src, poster, ...props }: { src: string; poster?: string; [key: string]: unknown }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
