@@ -63,7 +63,7 @@ export const CustomVideoPlayer = forwardRef<HTMLVideoElement, CustomVideoPlayerP
     if (!video) return;
 
     if (isInView && isHovered) {
-      video.play().catch(() => {});
+      void video.play().catch(() => {});
     } else {
       video.pause();
     }
