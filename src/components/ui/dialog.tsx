@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import { cn } from "@/lib/utils"
 
 const Dialog = DialogPrimitive.Root
@@ -29,8 +30,10 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    hideTitle?: boolean;
+  }
+>(({ className, children, hideTitle = true, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -41,6 +44,11 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
+      {hideTitle && (
+        <VisuallyHidden.Root asChild>
+          <DialogPrimitive.Title>Dialog</DialogPrimitive.Title>
+        </VisuallyHidden.Root>
+      )}
       {children}
     </DialogPrimitive.Content>
   </DialogPortal>

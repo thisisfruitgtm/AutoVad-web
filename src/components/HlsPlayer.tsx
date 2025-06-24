@@ -13,17 +13,48 @@ export const HlsPlayer = forwardRef<HTMLVideoElement, HlsPlayerProps>(({ src, po
   const videoRef = (ref || internalVideoRef) as React.RefObject<HTMLVideoElement>;
 
   useEffect(() => {
-    if (videoRef.current) {
+    if (videoRef.current && src) {
       // Check if it's an HLS stream
       if (src.includes('.m3u8') || src.includes('application/vnd.apple.mpegurl')) {
         if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
           videoRef.current.src = src;
         } else if (Hls.isSupported()) {
-          const hls = new Hls();
+          const hls = new Hls({
+            xhrSetup: (xhr) => {
+              // Don't send credentials for external media requests
+              xhr.withCredentials = false;
+            }
+          });
+          
+          // Handle HLS errors
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  console.warn('HLS network error, trying to recover...', data);
+                  hls.startLoad();
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  console.warn('HLS media error, trying to recover...', data);
+                  hls.recoverMediaError();
+                  break;
+                default:
+                  console.error('HLS fatal error, cannot recover:', data);
+                  hls.destroy();
+                  break;
+              }
+            } else {
+              console.debug('HLS non-fatal error:', data);
+            }
+          });
+          
           hls.loadSource(src);
           hls.attachMedia(videoRef.current);
+          
           return () => {
-            hls.destroy();
+            if (hls) {
+              hls.destroy();
+            }
           };
         }
       } else {
@@ -37,6 +68,7 @@ export const HlsPlayer = forwardRef<HTMLVideoElement, HlsPlayerProps>(({ src, po
     <video
       ref={videoRef}
       poster={poster}
+      crossOrigin="anonymous"
       style={{ 
         width: '100%', 
         height: '100%', 

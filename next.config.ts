@@ -50,6 +50,11 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    // Skip CSP headers in development to avoid conflicts with middleware
+    if (process.env.NODE_ENV === 'development') {
+      return [];
+    }
+    
     return [
       {
         source: '/api/:path*',
@@ -117,7 +122,7 @@ const nextConfig: NextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https: blob:",
               "media-src 'self' https: blob:",
-              "connect-src 'self' https://mktfybjfxzhvpmnepshq.supabase.co https://api.mux.com https://stream.mux.com",
+              "connect-src 'self' https://mktfybjfxzhvpmnepshq.supabase.co https://api.mux.com https://stream.mux.com https://*.mux.com",
               "frame-src 'none'",
               "object-src 'none'",
               "base-uri 'self'",

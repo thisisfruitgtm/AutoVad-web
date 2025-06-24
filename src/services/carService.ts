@@ -111,7 +111,7 @@ export const carService = {
       const transformedCarsWithUrls = transformedCars.map((car: Car) => ({
         ...car,
         videos: car.videos?.map((video: string) => getMuxVideoUrl(video)) || [],
-        thumbnail_url: car.thumbnail_url ? getMuxThumbnailUrl(car.thumbnail_url) : car.thumbnail_url,
+        thumbnail_url: car.thumbnail_url, // Already a full URL from database
       }));
       
       return {
@@ -144,7 +144,7 @@ export const carService = {
         ...car,
         images: car.images || [],
         videos: car.videos?.map((video: string) => getMuxVideoUrl(video)) || [],
-        thumbnail_url: car.thumbnail_url ? getMuxThumbnailUrl(car.thumbnail_url) : car.thumbnail_url,
+        thumbnail_url: car.thumbnail_url, // Already a full URL from database
         seller: car.seller || {
           id: 'autovad-verified',
           name: 'Autovad Verified',
@@ -190,7 +190,7 @@ export const carService = {
       const transformedCarsWithUrls = transformedCars.map((car: Car) => ({
         ...car,
         videos: car.videos?.map((video: string) => getMuxVideoUrl(video)) || [],
-        thumbnail_url: car.thumbnail_url ? getMuxThumbnailUrl(car.thumbnail_url) : car.thumbnail_url,
+        thumbnail_url: car.thumbnail_url, // Already a full URL from database
       }));
       
       return {

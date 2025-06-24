@@ -64,8 +64,14 @@ export const CustomVideoPlayer = forwardRef<HTMLVideoElement, CustomVideoPlayerP
     if (!video) return;
 
     if (isInView && isHovered) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      void video.play();
+      // Try to play, but handle autoplay policy errors gracefully
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          // Autoplay was prevented - this is expected behavior
+          console.debug('Autoplay prevented:', error.message);
+        });
+      }
     } else {
       video.pause();
     }
@@ -81,7 +87,17 @@ export const CustomVideoPlayer = forwardRef<HTMLVideoElement, CustomVideoPlayerP
   const togglePlayPause = () => {
     const video = videoRef.current;
     if (!video) return;
-    isPlaying ? video.pause() : video.play();
+    
+    if (isPlaying) {
+      video.pause();
+    } else {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.error('Play failed:', error.message);
+        });
+      }
+    }
   };
 
   const toggleMute = () => {
@@ -123,27 +139,33 @@ export const CustomVideoPlayer = forwardRef<HTMLVideoElement, CustomVideoPlayerP
 
   return (
     <div ref={containerRef} className="relative w-full h-full group/player overflow-hidden bg-black">
-      {/* Check if it's an HLS stream or regular video */}
-      {src.includes('.m3u8') || src.includes('application/vnd.apple.mpegurl') ? (
-        <HlsPlayer 
-          ref={videoRef}
-          src={src} 
-          poster={poster} 
-          style={{ width: '100%', height: '100%', background: 'black' }} 
-        />
-      ) : (
-        <video
-          ref={videoRef}
-          src={src}
-          poster={poster}
-          style={{ 
-            width: '100%', 
-            height: '100%', 
-            objectFit: 'cover',
-            aspectRatio: '9/16',
-            background: 'black' 
-          }}
-        />
+      {/* Only render video if src is not empty */}
+      {src && (
+        <>
+          {/* Check if it's an HLS stream or regular video */}
+          {src.includes('.m3u8') || src.includes('application/vnd.apple.mpegurl') ? (
+            <HlsPlayer 
+              ref={videoRef}
+              src={src} 
+              poster={poster} 
+              style={{ width: '100%', height: '100%', background: 'black' }} 
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              src={src}
+              poster={poster}
+              crossOrigin="anonymous"
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover',
+                aspectRatio: '9/16',
+                background: 'black' 
+              }}
+            />
+          )}
+        </>
       )}
       
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 md:p-4 opacity-0 group-hover/player:opacity-100 transition-opacity duration-300">

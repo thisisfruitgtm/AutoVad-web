@@ -47,7 +47,8 @@ export function CarCard({
   
   const isCurrentVideo = currentMediaIndex < optimizedVideos.length;
   const currentMediaUrl = allMedia[currentMediaIndex];
-  const currentVideoPoster = isCurrentVideo && optimizedVideos[currentMediaIndex] ? optimizedVideos[currentMediaIndex].poster : null;
+  const currentVideoPoster = isCurrentVideo && optimizedVideos[currentMediaIndex] ? 
+    (car.thumbnail_url || optimizedVideos[currentMediaIndex].poster) : null;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ro-RO', {

@@ -7,6 +7,7 @@ import { ImageViewer } from './ImageViewer';
 import Image from 'next/image';
 import { trackCarView, trackLike, trackComment, trackShare } from '@/lib/analytics';
 import { CustomVideoPlayer } from './CustomVideoPlayer';
+import { getMuxThumbnailUrl } from '@/lib/utils';
 
 interface CarPostProps {
   car: Car;
@@ -143,8 +144,13 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
   // Helper for thumbnail
   const getThumbnail = (url: string | undefined) => url ? `${url}?width=200&quality=60` : null;
 
-  // Helper for video poster
-  const getVideoPoster = (url: string | undefined) => url ? `${url}?poster=1` : undefined;
+  // Helper for video poster - use Mux thumbnail URL
+  const getVideoPoster = (url: string | undefined) => {
+    if (!url) return undefined;
+    // Extract playback ID from Mux URL and generate thumbnail
+    const playbackId = url.replace('https://stream.mux.com/', '').replace('.m3u8', '');
+    return getMuxThumbnailUrl(playbackId);
+  };
 
   return (
     <>
