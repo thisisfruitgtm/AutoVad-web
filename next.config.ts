@@ -154,9 +154,8 @@ const nextConfig: NextConfig = {
   // Security: Disable directory listing
   trailingSlash: false,
   // Security: Enable experimental features for better security
+  serverExternalPackages: ['@supabase/supabase-js'],
   experimental: {
-    // Enable server components for better security
-    serverComponentsExternalPackages: ['@supabase/supabase-js'],
     // Enable security features
     serverActions: {
       bodySizeLimit: '1mb',
