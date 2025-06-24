@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 'use client';
 
 import { useState, useRef, useEffect, forwardRef } from 'react';
@@ -63,10 +64,8 @@ export const CustomVideoPlayer = forwardRef<HTMLVideoElement, CustomVideoPlayerP
     if (!video) return;
 
     if (isInView && isHovered) {
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      void video.play();
     } else {
       video.pause();
     }
