@@ -10,8 +10,9 @@ posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
   debug: process.env.NODE_ENV === "development",
   // Cross-platform properties
   loaded: (posthog) => {
-    // Set platform-specific properties
-    posthog.identify('', {
+    // Set platform-specific properties without user identification
+    // User identification will be handled by the auth hook
+    posthog.setPersonProperties({
       platform: 'web',
       user_agent: navigator.userAgent,
       screen_resolution: `${screen.width}x${screen.height}`,

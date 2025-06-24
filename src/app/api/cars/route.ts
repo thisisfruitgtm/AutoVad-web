@@ -1,4 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { 
+  SecurityValidator, 
+  rateLimiter, 
+  validateApiRequest, 
+  createErrorResponse, 
+  createSuccessResponse,
+  getSecurityHeaders 
+} from '@/lib/security';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -21,35 +29,52 @@ function isRateLimited(ip: string) {
 }
 
 export async function GET(request: NextRequest) {
-  // Rate limiting
-  const ip = request.headers.get('x-forwarded-for') || 'unknown';
-  if (isRateLimited(ip)) {
-    return NextResponse.json({ success: false, error: 'Rate limit exceeded' }, { status: 429 });
-  }
-
   try {
+    // Rate limiting
+    const ip = request.headers.get('x-forwarded-for') || 
+               request.headers.get('x-real-ip') || 
+               'unknown';
+    
+    if (rateLimiter.isRateLimited(ip)) {
+      return createErrorResponse('Rate limit exceeded', 429);
+    }
+
+    // Validate request
+    const validation = validateApiRequest(request);
+    if (!validation.valid) {
+      return createErrorResponse(`Validation failed: ${validation.errors.join(', ')}`);
+    }
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('query');
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20'); // Reduced from unlimited to 20
+    const limit = parseInt(searchParams.get('limit') || '20');
     
-    // Basic validation: query max 50 chars, no special chars
-    if (query && (!/^[\w\s-]{0,50}$/.test(query))) {
-      return NextResponse.json({ success: false, error: 'Invalid query' }, { status: 400 });
+    // Enhanced input validation
+    if (query) {
+      const sanitizedQuery = SecurityValidator.sanitizeString(query);
+      if (sanitizedQuery !== query) {
+        return createErrorResponse('Invalid query parameter');
+      }
+      
+      if (!/^[\w\s-]{0,50}$/.test(query)) {
+        return createErrorResponse('Invalid query format');
+      }
     }
     
-    // Validate pagination
+    // Validate pagination parameters
     if (page < 1 || limit < 1 || limit > 50) {
-      return NextResponse.json({ success: false, error: 'Invalid pagination parameters' }, { status: 400 });
+      return createErrorResponse('Invalid pagination parameters');
     }
     
     const offset = (page - 1) * limit;
     
-    // Optimize query to select only necessary fields and limit results
-    let url = `${SUPABASE_URL}/rest/v1/cars?select=id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count&order=created_at.desc&limit=${limit}&offset=${offset}`;
+    // Build secure Supabase query
+    let url = `${SUPABASE_URL}/rest/v1/cars?select=id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count,images,videos&order=created_at.desc&limit=${limit}&offset=${offset}`;
     
     if (query) {
-      url = `${SUPABASE_URL}/rest/v1/cars?select=id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count&or=(make.ilike.%25${query}%25,model.ilike.%25${query}%25)&order=created_at.desc&limit=${limit}&offset=${offset}`;
+      const encodedQuery = encodeURIComponent(query);
+      url = `${SUPABASE_URL}/rest/v1/cars?select=id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count,images,videos&or=(make.ilike.%25${encodedQuery}%25,model.ilike.%25${encodedQuery}%25)&order=created_at.desc&limit=${limit}&offset=${offset}`;
     }
     
     const response = await fetch(url, {
@@ -60,10 +85,19 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
       },
     });
+    
     if (!response.ok) {
-      throw new Error(`Supabase error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Supabase error response:', errorText);
+      return createErrorResponse(`Database error: ${response.status}`, 500);
     }
+    
     const data = await response.json();
+    
+    // Validate response data
+    if (!Array.isArray(data)) {
+      return createErrorResponse('Invalid response format', 500);
+    }
     
     // Get total count for pagination
     const countUrl = `${SUPABASE_URL}/rest/v1/cars?select=count`;
@@ -82,28 +116,32 @@ export async function GET(request: NextRequest) {
       totalCount = countData[0]?.count || 0;
     }
     
-    return NextResponse.json({ 
-      success: true, 
+    const responseData = { 
       data: data, 
       count: data.length,
       totalCount,
       page,
       limit,
       hasMore: offset + limit < totalCount
-    }, {
+    };
+    
+    return new NextResponse(JSON.stringify(responseData), {
+      status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300', // Cache for 1 minute, stale for 5 minutes
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
         'CDN-Cache-Control': 'public, max-age=60',
+        ...getSecurityHeaders(),
+        'X-RateLimit-Remaining': rateLimiter.getRemainingRequests(ip).toString(),
+        'X-RateLimit-Reset': rateLimiter.getResetTime(ip).toString(),
       }
     });
+    
   } catch (error) {
     console.error('API Error:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
-      },
-      { status: 500 }
+    return createErrorResponse(
+      error instanceof Error ? error.message : 'Internal server error', 
+      500
     );
   }
 } 

@@ -30,7 +30,6 @@ export async function GET(request: NextRequest) {
   try {
     const url = request.nextUrl;
     const id = url.pathname.split('/').pop();
-    const includeImages = url.searchParams.get('images') === 'true';
     
     // Validation: ID must exist and be a valid UUID or numeric
     if (!id || !(/^\d+$/.test(id) || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))) {
@@ -40,10 +39,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Select fields based on whether images are needed
-    const selectFields = includeImages 
-      ? 'id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count,images,videos'
-      : 'id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count';
+    // Select all available fields
+    const selectFields = 'id,make,model,year,price,mileage,color,fuel_type,transmission,body_type,description,location,status,created_at,likes_count,comments_count,images,videos';
 
     const response = await fetch(`${SUPABASE_URL}/rest/v1/cars?id=eq.${id}&select=${selectFields}`, {
       method: 'GET',
@@ -55,7 +52,9 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      throw new Error(`Supabase error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Supabase error response:', errorText);
+      throw new Error(`Supabase error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -72,7 +71,7 @@ export async function GET(request: NextRequest) {
       data: data[0]
     }, {
       headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600', // Cache for 5 minutes
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
         'CDN-Cache-Control': 'public, max-age=300',
       }
     });

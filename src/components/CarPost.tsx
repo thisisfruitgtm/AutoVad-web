@@ -6,7 +6,6 @@ import { useState, useRef, useEffect } from 'react';
 import { ImageViewer } from './ImageViewer';
 import Image from 'next/image';
 import { trackCarView, trackLike, trackComment, trackShare } from '@/lib/analytics';
-import { useCarMedia } from '@/hooks/useCarMedia';
 import { CustomVideoPlayer } from './CustomVideoPlayer';
 
 interface CarPostProps {
@@ -28,8 +27,9 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Lazy load media when in view
-  const { images, videos, loading: mediaLoading } = useCarMedia(car.id, isInView);
+  // Use media directly from car data (like React Native app)
+  const images = car.images || [];
+  const videos = car.videos || [];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -154,15 +154,7 @@ export function CarPost({ car, onLike, onComment, onShare, displayMode = 'full' 
         <CardContent className="p-0">
           {/* Video/Image Section */}
           <div ref={containerRef} className="relative aspect-[9/16] bg-gray-900">
-            {mediaLoading ? (
-              // Loading state
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
-                  <p className="text-gray-400 text-xs">Se încarcă...</p>
-                </div>
-              </div>
-            ) : videos?.length > 0 ? (
+            {videos.length > 0 ? (
               <div 
                 className="relative w-full h-full group"
                 onMouseEnter={handleVideoMouseEnter}

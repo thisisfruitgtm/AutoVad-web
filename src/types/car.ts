@@ -25,6 +25,22 @@ export interface Car {
   playback_id?: string;
   thumbnail_url?: string;
   asset_ids?: string[];
+  // Additional properties for UI
+  seller?: {
+    id: string;
+    name: string;
+    avatar_url?: string;
+    rating: number;
+    verified: boolean;
+  };
+  brand?: {
+    id: string;
+    name: string;
+    avatar_url?: string;
+    rating: number;
+    verified: boolean;
+  };
+  is_liked?: boolean;
 }
 
 export interface User {

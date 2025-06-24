@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  // Disable automatic service worker generation
+  generateEtags: false,
+  // Disable source maps in production for security
+  productionBrowserSourceMaps: false,
+  // Enable compression
+  compress: true,
+  // Security: Disable powered by header
+  poweredByHeader: false,
   images: {
     remotePatterns: [
       {
@@ -21,8 +29,104 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'stream.mux.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'commondatastorage.googleapis.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
-    domains: ['images.unsplash.com', 'images.pexels.com'],
+  },
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=60, stale-while-revalidate=300',
+          },
+          {
+            key: 'X-Request-ID',
+            value: 'autovad-api',
+          },
+          // Security headers for API routes
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+        ],
+      },
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "img-src 'self' data: https: blob:",
+              "media-src 'self' https: blob:",
+              "connect-src 'self' https://mktfybjfxzhvpmnepshq.supabase.co https://api.mux.com https://stream.mux.com",
+              "frame-src 'none'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
+          },
+        ],
+      },
+    ];
   },
   async rewrites() {
     return [
@@ -42,7 +146,17 @@ const nextConfig: NextConfig = {
   },
   // This is required to support PostHog trailing slash API requests
   skipTrailingSlashRedirect: true,
-  // Pentru security headers vezi next-safe-middleware
+  // Security: Disable directory listing
+  trailingSlash: false,
+  // Security: Enable experimental features for better security
+  experimental: {
+    // Enable server components for better security
+    serverComponentsExternalPackages: ['@supabase/supabase-js'],
+    // Enable security features
+    serverActions: {
+      bodySizeLimit: '1mb',
+    },
+  },
 };
 
 export default nextConfig;

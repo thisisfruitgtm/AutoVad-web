@@ -1,9 +1,8 @@
 'use client';
 
 import { Car } from '@/types/car';
-import { useCarMedia } from '@/hooks/useCarMedia';
 import Image from 'next/image';
-import { Heart, Share, Gauge, Fuel, MapPin, User, Shield, RefreshCw } from 'lucide-react';
+import { Heart, Share, Gauge, Fuel, MapPin, User, Shield } from 'lucide-react';
 
 interface DesktopCarDetailsProps {
   car: Car;
@@ -13,7 +12,8 @@ interface DesktopCarDetailsProps {
 }
 
 export function DesktopCarDetails({ car, onImageClick, onLike, onShare }: DesktopCarDetailsProps) {
-  const { images, loading: mediaLoading } = useCarMedia(car.id, true);
+  // Use images directly from car data (like React Native app)
+  const images = car.images || [];
 
   const formatMileage = (mileage: number) => {
     return new Intl.NumberFormat('ro-RO').format(mileage) + ' km';
@@ -97,12 +97,8 @@ export function DesktopCarDetails({ car, onImageClick, onLike, onShare }: Deskto
           <div className="h-px flex-1 bg-gray-800"></div>
         </h3>
         <div className="grid grid-cols-4 gap-3">
-          {mediaLoading ? (
-             <div className="col-span-4 flex justify-center items-center p-8">
-                <RefreshCw className="animate-spin h-8 w-8 text-orange-500" />
-             </div>
-          ) : images && images.length > 0 ? (
-            images.map((image, index) => (
+          {images.length > 0 ? (
+            images.map((image: string, index: number) => (
               <button 
                 key={index}
                 onClick={() => onImageClick(images, index)}

@@ -34,8 +34,10 @@ export default function TestPage() {
     try {
       setLoading(true);
       const result = await carService.getCars();
+      console.log('API result from carService.getCars:', result);
       setCars(result.data);
       setFilteredCars(result.data);
+      console.log('Cars after loadCars:', result.data);
     } catch (error) {
       console.error('Error loading cars:', error);
     } finally {
@@ -91,6 +93,9 @@ export default function TestPage() {
   const handleFiltersChange = useCallback((filtered: Car[]) => {
     setFilteredCars(filtered);
   }, []);
+
+  // Add logs in render
+  console.log('Rendering TestPage. cars:', cars, 'filteredCars:', filteredCars, 'loading:', loading);
 
   if (loading || authLoading) {
     return (
@@ -334,7 +339,7 @@ export default function TestPage() {
                   <h2 className="text-xl font-bold text-white mb-6">Profil</h2>
                   <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800">
                     <div className="flex items-center gap-4 mb-6">
-                      <div className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center">
+                      <div className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                         <User className="w-7 h-7 text-white" />
                       </div>
                       <div>

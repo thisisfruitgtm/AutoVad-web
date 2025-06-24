@@ -123,7 +123,28 @@ export const CustomVideoPlayer = forwardRef<HTMLVideoElement, CustomVideoPlayerP
 
   return (
     <div ref={containerRef} className="relative w-full h-full group/player overflow-hidden bg-black">
-      <HlsPlayer src={src} poster={poster} style={{ width: '100%', height: '100%', background: 'black' }} />
+      {/* Check if it's an HLS stream or regular video */}
+      {src.includes('.m3u8') || src.includes('application/vnd.apple.mpegurl') ? (
+        <HlsPlayer 
+          ref={videoRef}
+          src={src} 
+          poster={poster} 
+          style={{ width: '100%', height: '100%', background: 'black' }} 
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          src={src}
+          poster={poster}
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            objectFit: 'cover',
+            aspectRatio: '9/16',
+            background: 'black' 
+          }}
+        />
+      )}
       
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 md:p-4 opacity-0 group-hover/player:opacity-100 transition-opacity duration-300">
         <input

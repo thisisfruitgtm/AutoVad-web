@@ -1,35 +1,152 @@
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export function middleware() {
+// In-memory rate limiting (for production, use Redis)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 100; // requests per window
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return false;
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return true;
+  }
+  
+  record.count++;
+  return false;
+}
+
+function sanitizeInput(input: string): string {
+  // Remove potentially dangerous characters
+  return input.replace(/[<>\"'&]/g, '');
+}
+
+export function middleware(request: NextRequest) {
   const response = NextResponse.next();
+  
+  // Rate limiting
+  const ip = request.headers.get('x-forwarded-for') || 
+             request.headers.get('x-real-ip') || 
+             'unknown';
+  
+  if (isRateLimited(ip)) {
+    return new NextResponse(
+      JSON.stringify({ error: 'Rate limit exceeded' }),
+      { 
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': '60',
+        }
+      }
+    );
+  }
 
-  // Content Security Policy
-  response.headers.set(
-    'Content-Security-Policy',
-    [
-      "default-src 'self'",
-      "img-src 'self' data: https: mktfybjfxzhvpmnepshq.supabase.co images.pexels.com",
-      "media-src 'self' https: mktfybjfxzhvpmnepshq.supabase.co",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
-      "font-src 'self' https: data:",
-      "connect-src 'self' https: mktfybjfxzhvpmnepshq.supabase.co"
-    ].join('; ')
-  );
-  // HSTS
+  // Input validation for API routes
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    const url = request.nextUrl;
+    
+    // Validate query parameters
+    for (const [key, value] of url.searchParams.entries()) {
+      if (typeof value === 'string' && value.length > 1000) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Query parameter too long' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+    
+    // Validate path parameters
+    const pathSegments = url.pathname.split('/');
+    for (const segment of pathSegments) {
+      if (segment.length > 100) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Path parameter too long' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+  }
+
+  // Enhanced Content Security Policy
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://eu.i.posthog.com https://eu-assets.i.posthog.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: https: blob: https://mktfybjfxzhvpmnepshq.supabase.co https://images.pexels.com https://images.unsplash.com",
+    "media-src 'self' blob: https: https://mktfybjfxzhvpmnepshq.supabase.co",
+    "connect-src 'self' https: https://mktfybjfxzhvpmnepshq.supabase.co https://eu.i.posthog.com https://eu-assets.i.posthog.com",
+    "frame-src 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests",
+  ].join('; ');
+
+  // Security headers
+  response.headers.set('Content-Security-Policy', csp);
   response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
-  // X-Frame-Options
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
-  // Referrer Policy
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  // Permissions Policy
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()');
+  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+  
+  // Remove server information
+  response.headers.delete('X-Powered-By');
+  response.headers.delete('Server');
+  
+  // Add security headers for tracking
+  response.headers.set('X-Request-ID', `autovad-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
 
   return response;
 }
 
+// CORS configuration
+const corsConfig = {
+  allowedOrigins: [
+    'https://autovad.vercel.app',
+    'https://mktfybjfxzhvpmnepshq.supabase.co',
+    'https://stream.mux.com',
+    'https://commondatastorage.googleapis.com',
+    'https://images.unsplash.com',
+    'https://images.pexels.com',
+    'https://api.mux.com',
+  ],
+  allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Client-Info',
+    'X-Platform',
+    'X-App-Version',
+    'X-Requested-With',
+  ],
+  credentials: false,
+  maxAge: 86400, // 24 hours
+};
+
 export const config = {
   matcher: [
-    '/((?!_next|favicon.ico|assets|public).*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
   ],
 }; 
